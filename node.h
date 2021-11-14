@@ -3,28 +3,35 @@
 
 #include <vector>
 #include <SFML/Graphics.hpp>
-//#include "edge.h"
 
 class Node {
 
 public:
 	Node();
-	Node(sf::Vector2f pos);
-	//void simulateStep();
+	Node(float a0, float a1, float a0_t, float a0_l);
+	void simulateStep();
+	void updatePosition();
+	void addAppendage(Node node);
 	void draw(sf::RenderWindow& window, sf::Color color = sf::Color::White);
 
+	Node* parent = nullptr;
 	std::vector<Node> appendages;
 
+	// physics information
+	float armLength;
+	float rotation;
 	sf::Vector2f position;
 	sf::Vector2f speed;
+	sf::Vector2f acceleration;
 	sf::Vector2f force;
 	float mass;
 
-	// movement information
-	int clock;
+	// muscle information
+	int clock; // runs from 0 to 1
 
-	float a0, a1;
-	float t0, t1;
+	float currentAngle;
+	float angle0, angle1;
+	float angle0_t, angle0_l;
 
 	// drawing information
 	float nodeRadius = 12;

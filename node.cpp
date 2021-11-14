@@ -1,18 +1,67 @@
+#define _USE_MATH_DEFINES
 #include "node.h"
 #include <SFML/Graphics.hpp>
+#include <math.h>
 
 Node::Node() {}
 
 
-Node::Node(sf::Vector2f pos) {
-	position = pos;
+Node::Node(float a0, float a1, float a0_t, float a0_l) {
+	angle0 = a0;
+	angle1 = a1;
+	angle0_t = a0_t;
+	angle0_l = a0_l;
+
+	currentAngle = angle0;
+	armLength = 20;
+
+	clock = 0;
+
+	rotation = 0;
+	position = sf::Vector2f(0.f, 0.f);
 	speed = sf::Vector2f(0.f, 0.f);
-	force = sf::Vector2f(0.f,0.f);
+	acceleration = sf::Vector2f(0.f, 0.f);
+	force = sf::Vector2f(0.f, 0.f);
 	mass = 1;
 
 	appendages = std::vector<Node>();
 }
 
+void Node::simulateStep() {
+	if (parent != nullptr) { // exclude body node
+		// compute current angle
+	}
+
+	for (Node appendage : appendages) {
+		appendage.simulateStep();
+	}
+}
+
+inline float DegToRad(float Deg)
+{
+	return Deg / 180.f * M_PI;
+}
+
+
+void Node::updatePosition()
+{
+	if (parent != nullptr) { // exclude body node
+		rotation = parent->rotation + currentAngle;
+		position = parent->position + sf::Vector2f(std::cosf(DegToRad(currentAngle)), std::sinf(DegToRad(currentAngle))) * armLength;
+	}
+
+	for (Node appendage : appendages) {
+		appendage.updatePosition();
+	}
+}
+
+
+void Node::addAppendage(Node node)
+{
+	node.parent = this;
+	node.updatePosition();
+	appendages.push_back(node);
+}
 
 void Node::draw(sf::RenderWindow& window, sf::Color color) {
 

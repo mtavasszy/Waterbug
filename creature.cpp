@@ -4,26 +4,23 @@
 
 
 Creature::Creature() {
-	bodyNode = Node(sf::Vector2f(1280/2, 720/2));
-
-	Node secondnode = Node(sf::Vector2f(1280 / 2 - 50, 720 / 2 - 30));
-	Node thirdnode = Node(sf::Vector2f(1280 / 2 + 50, 720 / 2 - 30));
-	bodyNode.appendages.push_back(secondnode);
-	bodyNode.appendages.push_back(thirdnode);
+	initialize();
 }
 
 void Creature::initialize() {
+	bodyNode = Node(0,0,0,0);
+	bodyNode.position = sf::Vector2f(1280 / 2, 720 / 2);
 
+	Node secondnode = Node(120, 140, 0.25, 0.25);
+	Node thirdnode = Node(240, 280, 0, 0.3);
+	bodyNode.addAppendage(secondnode);
+	bodyNode.addAppendage(thirdnode);
 
 }
 
 void Creature::simulateStep() {
-	// moving water takes energy
-	// moving other appendages costs energy
-
-	for (Node node : bodyNode.appendages) {
-		//ap.simulateStep();
-	}
+	bodyNode.simulateStep();
+	bodyNode.updatePosition();
 }
 
 void Creature::simulate() {
