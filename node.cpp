@@ -6,15 +6,15 @@
 Node::Node() {}
 
 
-Node::Node(float a0, float a1, float a0_t, float a0_l) {
+Node::Node(float a0, float a1, float a0_l) {
 	angle0 = a0;
 	angle1 = a1;
-	angle0_t = a0_t;
 	angle0_l = a0_l;
 
 	currentAngle = angle0;
 
-	clock = 0;
+	clockStart = 0; // random?
+	clock = clockStart;
 
 	rotation = 0;
 	position = sf::Vector2f(0.f, 0.f);
@@ -26,13 +26,45 @@ Node::Node(float a0, float a1, float a0_t, float a0_l) {
 	appendages = std::vector<Node>();
 }
 
-void Node::simulateStep() {
-	if (parent != nullptr) { // exclude body node
-		// compute current angle
+void Node::updateCurrentAngle() {
+	float currentAngleCoeff = 1; // 0 represents a0, 1 is a1
+
+	if (clock > angle0_l + moveTime && clock < 1 - moveTime) {
+		currentAngleCoeff = 0;
+	}
+	else if (clock > angle0_l - moveTime && clock <= angle0_l) { // move from 0 to 1 pt. 1
+		float m = (clock - (angle0_l - moveTime)) / moveTime;
+		currentAngleCoeff = 0.25f * m * m;
+	}
+	else if (clock > angle0_l && clock < angle0_l + moveTime) { // move from 0 to 1 pt. 2
+		float m = (clock - angle0_l) / moveTime;
+		currentAngleCoeff = 0.5f - ((0.5f - 0.5f * m) * (0.5f - 0.5f * m));
+	}
+	else if (clock > 1.f - moveTime) { // move from 1 to 0 pt. 1
+		float m = (1.f - clock) / moveTime;
+		currentAngleCoeff = 0.5f - ((0.5f - 0.5f * m) * (0.5f - 0.5f * m));
+	}
+	if (clock < moveTime) { // move from 1 to 0 pt. 2
+		float m = (moveTime - clock) / moveTime;
+		currentAngleCoeff = 0.25f * m * m;
 	}
 
-	for (Node appendage : appendages) {
-		appendage.simulateStep();
+	currentAngle = angle1 * currentAngleCoeff + angle0 * (1 - currentAngleCoeff);
+}
+
+void Node::simulateStep() {
+	if (parent != nullptr) { // exclude body node
+		updateCurrentAngle();
+
+		clock += deltaClock;
+		if (clock > 1.f) {
+			clock = 0;
+		}
+	}
+
+	for (int i = 0; i < appendages.size();i++) {
+		Node* n = &appendages[i];
+		n->simulateStep();
 	}
 }
 
@@ -49,8 +81,9 @@ void Node::updatePosition()
 		position = parent->position + sf::Vector2f(std::cosf(DegToRad(currentAngle)), std::sinf(DegToRad(currentAngle))) * armLength;
 	}
 
-	for (Node appendage : appendages) {
-		appendage.updatePosition();
+	for (int i = 0; i < appendages.size(); i++) {
+		Node* n = &appendages[i];
+		n->updatePosition();
 	}
 }
 

@@ -8,7 +8,8 @@ class Node {
 
 public:
 	Node();
-	Node(float a0, float a1, float a0_t, float a0_l);
+	Node(float a0, float a1, float a0_l);
+	void updateCurrentAngle();
 	void simulateStep();
 	void updatePosition();
 	void addAppendage(Node node);
@@ -18,7 +19,7 @@ public:
 	std::vector<Node> appendages;
 
 	// physics information
-	float armLength = 40;
+	float armLength = 40.f;
 	float rotation;
 	sf::Vector2f position;
 	sf::Vector2f speed;
@@ -27,15 +28,18 @@ public:
 	float mass;
 
 	// muscle information
-	int clock; // runs from 0 to 1
+	float clock; // runs from 0 to 1
+	float clockStart;
+	float deltaClock = 0.001f;
+	float moveTime = 0.2f;
 
 	float currentAngle;
 	float angle0, angle1;
-	float angle0_t, angle0_l;
+	float angle0_l;
 
 	// drawing information
-	float nodeRadius = 12;
-	float edgeThickness = 4;
+	float nodeRadius = 12.f;
+	float edgeThickness = 4.f;
 };
 
 #endif  // NODE_H_
