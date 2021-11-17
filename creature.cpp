@@ -10,8 +10,8 @@ void Creature::initialize() {
 	bodyNode = Node(0,0,0);
 	bodyNode.position = sf::Vector2f(1280 / 2, 720 / 2);
 
-	Node secondnode = Node(120, 140, 0.25);
-	Node thirdnode = Node(240, 280, 0.3);
+	Node secondnode = Node(120, 140, 0.5);
+	Node thirdnode = Node(240, 280, 0.4);
 	bodyNode.addAppendage(secondnode);
 	bodyNode.addAppendage(thirdnode);
 
