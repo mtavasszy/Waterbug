@@ -13,7 +13,6 @@ Node::Node(float a0, float a1, float a0_t, float a0_l) {
 	angle0_l = a0_l;
 
 	currentAngle = angle0;
-	armLength = 20;
 
 	clock = 0;
 

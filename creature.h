@@ -2,7 +2,6 @@
 #define CREATURE_H_
 
 #include <SFML/Graphics.hpp>
-//#include "edge.h"
 #include "node.h"
 
 class Creature {

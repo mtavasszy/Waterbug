@@ -18,7 +18,7 @@ public:
 	std::vector<Node> appendages;
 
 	// physics information
-	float armLength;
+	float armLength = 40;
 	float rotation;
 	sf::Vector2f position;
 	sf::Vector2f speed;

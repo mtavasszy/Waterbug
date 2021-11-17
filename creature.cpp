@@ -1,5 +1,4 @@
 #include "creature.h"
-//#include "edge.h"
 #include "node.h"
 
 
