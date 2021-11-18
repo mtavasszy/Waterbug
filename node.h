@@ -30,7 +30,7 @@ public:
 	// muscle information
 	float clock; // runs from 0 to 1
 	float clockStart;
-	float deltaClock = 0.001f;
+	float deltaClock = 0.002f;
 	float moveTime = 0.2f;
 
 	float currentAngle;

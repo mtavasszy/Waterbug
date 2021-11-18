@@ -29,25 +29,19 @@ Node::Node(float a0, float a1, float a0_l) {
 void Node::updateCurrentAngle() {
 	float currentAngleCoeff = 0; // 0 represents a0, 1 is a1
 
-	if (clock > angle0_l + moveTime && clock < 1 - moveTime) {
-		currentAngleCoeff = 1;
-	}
-	else if (clock > angle0_l - moveTime && clock <= angle0_l) { // move from 0 to 1 pt. 1
-		float m = (clock - (angle0_l - moveTime)) / moveTime;
-		currentAngleCoeff = 0.5f * m * m;
-	}
-	else if (clock > angle0_l && clock < angle0_l + moveTime) { // move from 0 to 1 pt. 2
-		float m = (clock - angle0_l) / moveTime;
-		currentAngleCoeff = 1.f - 2.f * ((0.5f - 0.5f * m) * (0.5f - 0.5f * m));
-	}
-	else if (clock > 1.f - moveTime) { // move from 1 to 0 pt. 1
-		float m = (1.f - clock) / moveTime;
-		currentAngleCoeff = 1.f - 2.f * ((0.5f - 0.5f * m) * (0.5f - 0.5f * m));
-	}
-	if (clock < moveTime) { // move from 1 to 0 pt. 2
-		float m = (moveTime - clock) / moveTime;
-		currentAngleCoeff = 0.5f * m * m;
-	}
+	float m = 0.f; // a0
+
+	if (clock > angle0_l + moveTime) // a1
+		m = 1.f;
+	else if (clock < moveTime) // move from a1 to a0
+		m = 1.f - (clock / moveTime);
+	else if (clock > angle0_l && clock <= angle0_l + moveTime) // move from a0 to a1
+		m = (clock - angle0_l) / moveTime;
+
+	if (m < 0.5f)
+		currentAngleCoeff = 2.f * m * m; // acceleration
+	else
+		currentAngleCoeff = 1.f - 2.f * ((1.f - m) * (1.f - m)); // deceleration
 
 	currentAngle = angle1 * currentAngleCoeff + angle0 * (1 - currentAngleCoeff);
 }
