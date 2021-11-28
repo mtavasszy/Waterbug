@@ -31,11 +31,13 @@ public:
 	float clock; // runs from 0 to 1
 	float clockStart;
 	float deltaClock = 0.002f;
-	float moveTime = 0.2f;
+	float armMoveTime = 0.2f;
 
-	float currentAngle;
-	float angle0, angle1;
-	float angle0_l;
+	float armAnglePos;
+	float armAngleVel = 0;
+	float armAngleAcc = 0;
+	float armAngle0, armAngle1;
+	float armAngle0_t;
 
 	// drawing information
 	float nodeRadius = 12.f;

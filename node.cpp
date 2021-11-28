@@ -7,11 +7,11 @@ Node::Node() {}
 
 
 Node::Node(float a0, float a1, float a0_l) {
-	angle0 = a0;
-	angle1 = a1;
-	angle0_l = a0_l;
+	armAngle0 = a0;
+	armAngle1 = a1;
+	armAngle0_t = a0_l;
 
-	currentAngle = angle0;
+	armAnglePos = armAngle1;
 
 	clockStart = 0; // random?
 	clock = clockStart;
@@ -27,23 +27,46 @@ Node::Node(float a0, float a1, float a0_l) {
 }
 
 void Node::updateCurrentAngle() {
-	float currentAngleCoeff = 0; // 0 represents a0, 1 is a1
 
-	float m = 0.f; // a0
+	if (clock > armMoveTime && clock < armAngle0_t) { // set to armAngle0
+		armAnglePos = armAngle0;
+		armAngleVel = 0;
+		armAngleAcc = 0;
+		return;
+	}
+	else if (clock > armAngle0_t + armMoveTime) { // set to armAngle1
+		armAnglePos = armAngle1;
+		armAngleVel = 0;
+		armAngleAcc = 0;
+		return;
+	}
 
-	if (clock > angle0_l + moveTime) // a1
-		m = 1.f;
-	else if (clock < moveTime) // move from a1 to a0
-		m = 1.f - (clock / moveTime);
-	else if (clock > angle0_l && clock <= angle0_l + moveTime) // move from a0 to a1
-		m = (clock - angle0_l) / moveTime;
+	float targetAngleDiff = armAngle1 - armAngle0;
+	float targetAcc = (4.f * targetAngleDiff) / armMoveTime;
 
-	if (m < 0.5f)
-		currentAngleCoeff = 2.f * m * m; // acceleration
-	else
-		currentAngleCoeff = 1.f - 2.f * ((1.f - m) * (1.f - m)); // deceleration
+	if (clock < 0.5f * armMoveTime) // a1 -> a0 accelerate
+		armAngleAcc = -targetAcc;
+	if (clock > 0.5f * armMoveTime && clock < armMoveTime) // a1 -> a0 decelerate
+		armAngleAcc = targetAcc;
+	if (clock > armAngle0_t && clock <= armAngle0_t + 0.5f * armMoveTime) // a0 -> a1 accelerate
+		armAngleAcc = targetAcc;
+	if (clock > armAngle0_t + 0.5f * armMoveTime && clock <= armAngle0_t + armMoveTime) // a0 -> a1 decelerate
+		armAngleAcc = -targetAcc;
 
-	currentAngle = angle1 * currentAngleCoeff + angle0 * (1 - currentAngleCoeff);
+	armAngleVel += armAngleAcc * deltaClock;
+	armAnglePos += armAngleVel * deltaClock;
+
+	if (armAnglePos < armAngle0) {
+		armAnglePos = armAngle0;
+		armAngleVel = 0;
+		armAngleAcc = 0;
+	}
+
+	if (armAnglePos > armAngle1) {
+		armAnglePos = armAngle1;
+		armAngleVel = 0;
+		armAngleAcc = 0;
+	}
 }
 
 void Node::simulateStep() {
@@ -71,8 +94,8 @@ inline float DegToRad(float Deg)
 void Node::updatePosition()
 {
 	if (parent != nullptr) { // exclude body node
-		rotation = parent->rotation + currentAngle;
-		position = parent->position + sf::Vector2f(std::cosf(DegToRad(currentAngle)), std::sinf(DegToRad(currentAngle))) * armLength;
+		rotation = parent->rotation + armAnglePos;
+		position = parent->position + sf::Vector2f(std::cosf(DegToRad(armAnglePos)), std::sinf(DegToRad(armAnglePos))) * armLength;
 	}
 
 	for (int i = 0; i < appendages.size(); i++) {
