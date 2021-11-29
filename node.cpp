@@ -28,30 +28,13 @@ Node::Node(float a0, float a1, float a0_l) {
 
 void Node::updateCurrentAngle() {
 
-	if (clock > armMoveTime && clock < armAngle0_t) { // set to armAngle0
-		armAnglePos = armAngle0;
-		armAngleVel = 0;
-		armAngleAcc = 0;
-		return;
-	}
-	else if (clock > armAngle0_t + armMoveTime) { // set to armAngle1
-		armAnglePos = armAngle1;
-		armAngleVel = 0;
-		armAngleAcc = 0;
-		return;
-	}
-
 	float targetAngleDiff = armAngle1 - armAngle0;
-	float targetAcc = (4.f * targetAngleDiff) / armMoveTime;
+	float targetAcc = (40.f * targetAngleDiff);
 
-	if (clock < 0.5f * armMoveTime) // a1 -> a0 accelerate
+	if (clock < armAngle0_t) // a1 -> a0 accelerate
 		armAngleAcc = -targetAcc;
-	if (clock > 0.5f * armMoveTime && clock < armMoveTime) // a1 -> a0 decelerate
+	if (clock > armAngle0_t) // a0 -> a1 accelerate
 		armAngleAcc = targetAcc;
-	if (clock > armAngle0_t && clock <= armAngle0_t + 0.5f * armMoveTime) // a0 -> a1 accelerate
-		armAngleAcc = targetAcc;
-	if (clock > armAngle0_t + 0.5f * armMoveTime && clock <= armAngle0_t + armMoveTime) // a0 -> a1 decelerate
-		armAngleAcc = -targetAcc;
 
 	armAngleVel += armAngleAcc * deltaClock;
 	armAnglePos += armAngleVel * deltaClock;

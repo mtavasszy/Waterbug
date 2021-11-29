@@ -30,8 +30,7 @@ public:
 	// muscle information
 	float clock; // runs from 0 to 1
 	float clockStart;
-	float deltaClock = 0.002f;
-	float armMoveTime = 0.2f;
+	float deltaClock = 0.02f;
 
 	float armAnglePos;
 	float armAngleVel = 0;
