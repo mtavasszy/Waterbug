@@ -78,7 +78,7 @@ void Node::updatePosition()
 {
 	if (parent != nullptr) { // exclude body node
 		rotation = parent->rotation + armAnglePos;
-		position = parent->position + sf::Vector2f(std::cosf(DegToRad(armAnglePos)), std::sinf(DegToRad(armAnglePos))) * armLength;
+		position = parent->position + sf::Vector2f(std::cosf(DegToRad(rotation)), std::sinf(DegToRad(rotation))) * armLength;
 	}
 
 	for (int i = 0; i < appendages.size(); i++) {

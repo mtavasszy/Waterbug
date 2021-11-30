@@ -12,8 +12,10 @@ void Creature::initialize() {
 
 	Node secondnode = Node(120, 140, 0.5);
 	Node thirdnode = Node(240, 280, 0.2);
+	Node fourthnode = Node(-40, 10, 0.4);
 	bodyNode.addAppendage(secondnode);
 	bodyNode.addAppendage(thirdnode);
+	bodyNode.appendages[1].addAppendage(fourthnode);
 
 }
 
