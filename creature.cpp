@@ -1,5 +1,6 @@
 #include "creature.h"
 #include "node.h"
+#include "Vec2.h"
 
 
 Creature::Creature() {
@@ -7,27 +8,33 @@ Creature::Creature() {
 }
 
 void Creature::initialize() {
-	bodyNode = Node(0,0,0);
-	bodyNode.position = sf::Vector2f(1280 / 2, 720 / 2);
+	m_nodes.push_back(Node(true));
+	m_nodes[0].m_position = Vec2f(1280 / 2, 720 / 2);
+	m_mainNode = &m_nodes[0];
 
-	Node secondnode = Node(120, 140, 0.5);
-	Node thirdnode = Node(240, 280, 0.2);
-	Node fourthnode = Node(-40, 10, 0.4);
-	bodyNode.addAppendage(secondnode);
-	bodyNode.addAppendage(thirdnode);
-	bodyNode.appendages[1].addAppendage(fourthnode);
+	m_nodes.push_back(Node(120.f, 140.f, 0.5f));
+	m_nodes.push_back(Node(240.f, 280.f, 0.2f));
+	m_nodes.push_back(Node(-40.f, 10.f, 0.4f));
+	m_nodes[1].setParent(&m_nodes[0]);
+	m_nodes[2].setParent(&m_nodes[0]);
+	m_nodes[3].setParent(&m_nodes[1]);
 
+	for (auto it = m_nodes.begin(); it != m_nodes.end(); it++) {
+		it->updatePosition();
+	}
 }
 
-void Creature::simulateStep() {
-	bodyNode.simulateStep();
-	bodyNode.updatePosition();
-}
-
-void Creature::simulate() {
-
+void Creature::update(float dt) {
+	for (auto it = m_nodes.begin(); it != m_nodes.end(); it++ ) {
+		it->update(dt);
+	}
 }
 
 void Creature::draw(sf::RenderWindow& window) {
-	bodyNode.draw(window, sf::Color::Red);
+	for (auto it = m_nodes.begin(); it != m_nodes.end(); it++) {
+		it->drawEdge(window);
+	}
+	for (auto it = m_nodes.begin(); it != m_nodes.end(); it++) {
+		it->drawNode(window);
+	}
 }

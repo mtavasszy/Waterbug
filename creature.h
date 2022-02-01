@@ -2,6 +2,7 @@
 #define CREATURE_H_
 
 #include <SFML/Graphics.hpp>
+#include <vector>
 #include "node.h"
 
 class Creature {
@@ -9,11 +10,11 @@ class Creature {
 public:
 	Creature();
 	void initialize();
-	void simulateStep();
-	void simulate();
+	void update(float dt);
 	void draw(sf::RenderWindow &window);
 
-	Node bodyNode;
+	Node* m_mainNode;
+	std::vector<Node> m_nodes;
 };
 
 #endif  // CREATURE_H_

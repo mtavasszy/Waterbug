@@ -1,133 +1,146 @@
 #define _USE_MATH_DEFINES
+
 #include "node.h"
 #include <SFML/Graphics.hpp>
 #include <math.h>
+#include "Vec2.h"
 
-Node::Node() {}
+
+Node::Node() {
+	initialize();
+}
+
+Node::Node(bool isMainNode)
+{
+	m_isMainNode = isMainNode;
+	initialize();
+}
 
 
 Node::Node(float a0, float a1, float a0_l) {
-	armAngle0 = a0;
-	armAngle1 = a1;
-	armAngle0_t = a0_l;
+	initialize();
+	
+	m_armAngle0 = a0;
+	m_armAngle1 = a1;
+	m_armAngle0_t = a0_l;
 
-	armAnglePos = armAngle1;
-
-	clockStart = 0; // random?
-	clock = clockStart;
-
-	rotation = 0;
-	position = sf::Vector2f(0.f, 0.f);
-	speed = sf::Vector2f(0.f, 0.f);
-	acceleration = sf::Vector2f(0.f, 0.f);
-	force = sf::Vector2f(0.f, 0.f);
-	mass = 1;
-
-	appendages = std::vector<Node>();
+	m_armAnglePos = m_armAngle1;
 }
 
-void Node::updateCurrentAngle() {
+void Node::initialize()
+{
+	m_circle = sf::CircleShape(m_nodeRadius);
+	m_circle.setPointCount(20);
+	m_circle.setFillColor(m_isMainNode ? sf::Color::Red : sf::Color::White);
+	m_circle.setOutlineColor(sf::Color::Black);
+	m_circle.setOutlineThickness(-2.f);
 
-	float targetAngleDiff = armAngle1 - armAngle0;
-	float targetAcc = (40.f * targetAngleDiff);
+	m_clockStart = 0.f; // random?
+	m_clock = m_clockStart;
 
-	if (clock < armAngle0_t) // a1 -> a0 accelerate
-		armAngleAcc = -targetAcc;
-	if (clock > armAngle0_t) // a0 -> a1 accelerate
-		armAngleAcc = targetAcc;
+	m_rotation = 0;
+	m_rotationSpeed = 0;
+	m_position = Vec2f(0.f, 0.f);
+	m_velocity = Vec2f(0.f, 0.f);
+	m_acceleration = Vec2f(0.f, 0.f);
+	m_mass = 1;
 
-	armAngleVel += armAngleAcc * deltaClock;
-	armAnglePos += armAngleVel * deltaClock;
+	m_connectedNodes = std::vector<Node*>();
 
-	if (armAnglePos < armAngle0) {
-		armAnglePos = armAngle0;
-		armAngleVel = 0;
-		armAngleAcc = 0;
-	}
-
-	if (armAnglePos > armAngle1) {
-		armAnglePos = armAngle1;
-		armAngleVel = 0;
-		armAngleAcc = 0;
-	}
+	for (int i = 0; i < 4; ++i)
+		m_edgeVertices[i].color = sf::Color::White;
 }
 
-void Node::simulateStep() {
-	if (parent != nullptr) { // exclude body node
-		updateCurrentAngle();
-
-		clock += deltaClock;
-		if (clock > 1.f) {
-			clock = 0;
-		}
-	}
-
-	for (int i = 0; i < appendages.size();i++) {
-		Node* n = &appendages[i];
-		n->simulateStep();
-	}
+void Node::setParent(Node* p)
+{
+	m_parent = p;
+	p->m_connectedNodes.push_back(this);
 }
-
+//
+//void Node::updateCurrentAngle() {
+//
+//	float targetAngleDiff = armAngle1 - armAngle0;
+//	float targetAcc = (40.f * targetAngleDiff);
+//
+//	if (clock < armAngle0_t) // a1 -> a0 accelerate
+//		armAngleAcc = -targetAcc;
+//	if (clock > armAngle0_t) // a0 -> a1 accelerate
+//		armAngleAcc = targetAcc;
+//
+//	armAngleVel += armAngleAcc * deltaClock;
+//	armAnglePos += armAngleVel * deltaClock;
+//
+//	if (armAnglePos < armAngle0) {
+//		armAnglePos = armAngle0;
+//		armAngleVel = 0;
+//		armAngleAcc = 0;
+//	}
+//
+//	if (armAnglePos > armAngle1) {
+//		armAnglePos = armAngle1;
+//		armAngleVel = 0;
+//		armAngleAcc = 0;
+//	}
+//}
+//
+//void Node::simulateStep() {
+//	if (parent != nullptr) { // exclude body node
+//		updateCurrentAngle();
+//
+//		clock += deltaClock;
+//		if (clock > 1.f) {
+//			clock = 0;
+//		}
+//	}
+//
+//	for (int i = 0; i < appendages.size();i++) {
+//		Node* n = &appendages[i];
+//		n->simulateStep();
+//	}
+//}
+//
 inline float DegToRad(float Deg)
 {
-	return Deg / 180.f * M_PI;
+	return Deg / 180.f * float(M_PI);
 }
 
+
+void Node::update(float dt)
+{
+}
 
 void Node::updatePosition()
 {
-	if (parent != nullptr) { // exclude body node
-		rotation = parent->rotation + armAnglePos;
-		position = parent->position + sf::Vector2f(std::cosf(DegToRad(rotation)), std::sinf(DegToRad(rotation))) * armLength;
-	}
-
-	for (int i = 0; i < appendages.size(); i++) {
-		Node* n = &appendages[i];
-		n->updatePosition();
+	if (!m_isMainNode) { // exclude body node
+		m_rotation = m_parent->m_rotation + m_armAnglePos;
+		m_position = m_parent->m_position + Vec2f(std::cosf(DegToRad(m_rotation)), std::sinf(DegToRad(m_rotation))) * m_armLength;
 	}
 }
 
+inline sf::Vector2f toSFVec(Vec2f v) {
+	return sf::Vector2f(v.x, v.y);
+}
 
-void Node::addAppendage(Node node)
+void Node::drawEdge(sf::RenderWindow& window)
 {
-	node.parent = this;
-	node.updatePosition();
-	appendages.push_back(node);
+	if (!m_isMainNode) {
+		Vec2f direction = m_position - m_parent->m_position;
+		Vec2f unitDirection = direction.normalize();
+		Vec2f unitPerpendicular(-unitDirection.y, unitDirection.x);
+
+		Vec2f offset = (m_edgeThickness / 2.f) * unitPerpendicular;
+
+		m_edgeVertices[0].position = toSFVec(m_position + offset);
+		m_edgeVertices[1].position = toSFVec(m_parent->m_position + offset);
+		m_edgeVertices[2].position = toSFVec(m_parent->m_position - offset);
+		m_edgeVertices[3].position = toSFVec(m_position - offset);
+
+		window.draw(m_edgeVertices, 4, sf::Quads);
+	}
 }
 
-void Node::draw(sf::RenderWindow& window, sf::Color color) {
-
-	// draw edges
-	for (Node node : appendages) {
-		const sf::Vector2f direction = position - node.position;
-		const sf::Vector2f unitDirection = direction / std::sqrt(direction.x * direction.x + direction.y * direction.y);
-		const sf::Vector2f unitPerpendicular(-unitDirection.y, unitDirection.x);
-
-		sf::Vector2f offset = (edgeThickness / 2.f) * unitPerpendicular;
-
-		sf::Vertex vertices[4];
-		vertices[0].position = position + offset;
-		vertices[1].position = node.position + offset;
-		vertices[2].position = node.position - offset;
-		vertices[3].position = position - offset;
-
-		for (int i = 0; i < 4; ++i)
-			vertices[i].color = sf::Color::White;
-
-		window.draw(vertices, 4, sf::Quads);
-	}
-
-	// draw appendage nodes
-	for (Node node : appendages) {
-		node.draw(window);
-	}
-
-	// draw the node itself
-	sf::CircleShape circle = sf::CircleShape(nodeRadius);
-	circle.setPointCount(20);
-	circle.setPosition(position - sf::Vector2f(circle.getRadius(), circle.getRadius()));
-	circle.setFillColor(color);
-	circle.setOutlineColor(sf::Color::Black);
-	circle.setOutlineThickness(-2.f);
-	window.draw(circle);
+void Node::drawNode(sf::RenderWindow& window)
+{
+	m_circle.setPosition(toSFVec(m_position - m_circle.getRadius()));
+	window.draw(m_circle);
 }
