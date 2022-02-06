@@ -15,6 +15,7 @@ public:
 	void setParent(Node* p);
 
 	void update(float dt);
+	void updateRotation(float dt);
 	void updatePosition();
 	void drawEdge(sf::RenderWindow& window);
 	void drawNode(sf::RenderWindow& window);
@@ -35,9 +36,9 @@ public:
 	// muscle information
 	float m_clock; // runs from 0 to 1
 	float m_clockStart;
-	float m_deltaClock = 0.02f;
+	float m_clockSpeed = 1.f;
 
-	float m_armAngleVel = 1.f;
+	float m_armAngleVel = 20.f;
 	float m_armAnglePos;
 	float m_armAngle0, m_armAngle1;
 	float m_armAngle0_t;
