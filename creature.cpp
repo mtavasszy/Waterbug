@@ -4,37 +4,31 @@
 
 
 Creature::Creature() {
-	initialize();
-}
+	m_nodes.push_back(Node(Vec2f(300.f, 300.f)));
+	m_nodes.push_back(Node(Vec2f(400.f, 300.f)));
+	//m_nodes.push_back(Node(Vec2f(334.f, 320.f)));
 
-void Creature::initialize() {
-	m_nodes.push_back(Node(true));
-	m_nodes[0].m_position = Vec2f(1280 / 2, 720 / 2);
-	m_mainNode = &m_nodes[0];
-
-	m_nodes.push_back(Node(120.f, 140.f, 0.5f));
-	m_nodes.push_back(Node(240.f, 280.f, 0.2f));
-	m_nodes.push_back(Node(-40.f, 10.f, 0.4f));
-	m_nodes[1].setParent(&m_nodes[0]);
-	m_nodes[2].setParent(&m_nodes[0]);
-	m_nodes[3].setParent(&m_nodes[1]);
-
-	for (auto it = m_nodes.begin(); it != m_nodes.end(); it++) {
-		it->updatePosition();
-	}
+	m_muscles.push_back(Muscle(&m_nodes[0], &m_nodes[1]));
+	//m_muscles.push_back(Muscle(&m_nodes[1], &m_nodes[2]));
+	//m_muscles.push_back(Muscle(&m_nodes[2], &m_nodes[0]));
 }
 
 void Creature::update(float dt) {
+	// Compute muscle forces
+	for (auto it = m_muscles.begin(); it != m_muscles.end(); it++) {
+		it->update(dt);
+	}
+	// Apply forces to nodes
 	for (auto it = m_nodes.begin(); it != m_nodes.end(); it++ ) {
 		it->update(dt);
 	}
 }
 
 void Creature::draw(sf::RenderWindow& window) {
-	for (auto it = m_nodes.begin(); it != m_nodes.end(); it++) {
-		it->drawEdge(window);
+	for (auto it = m_muscles.begin(); it != m_muscles.end(); it++) {
+		it->draw(window);
 	}
 	for (auto it = m_nodes.begin(); it != m_nodes.end(); it++) {
-		it->drawNode(window);
+		it->draw(window);
 	}
 }

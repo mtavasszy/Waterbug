@@ -4,6 +4,7 @@
 int main()
 {
     int targetFPS = 60;
+    float dt = 1.f / float(targetFPS);
 
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
@@ -22,7 +23,7 @@ int main()
         }
 
         window.clear(sf::Color(14, 135, 204,255));
-        //creature.simulateStep(1.f / float(targetFPS));
+        creature.update(dt);
         creature.draw(window);
         window.display();
     }
