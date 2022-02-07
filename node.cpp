@@ -43,4 +43,12 @@ void Node::draw(sf::RenderWindow& window)
 	m_circle.setPosition(toSFVec(m_position - m_circle.getRadius()));
 	m_circle.setFillColor(m_fillColor);
 	window.draw(m_circle);
+
+	//sf::Vertex line[] =
+	//{
+	//	sf::Vertex(toSFVec(m_position), sf::Color::Yellow),
+	//	sf::Vertex(toSFVec(m_position + m_force), sf::Color::Yellow)
+	//};
+
+	//window.draw(line, 2, sf::Lines);
 }

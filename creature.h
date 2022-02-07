@@ -11,6 +11,8 @@ class Creature {
 public:
 	Creature();
 	void update(float dt);
+	void updateMuscles(float dt);
+	void updateNodes(float dt);
 	void draw(sf::RenderWindow &window);
 
 	std::vector<Node> m_nodes;

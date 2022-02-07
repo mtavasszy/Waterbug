@@ -8,7 +8,7 @@
 class Muscle {
 
 public:
-	Muscle(Node* A, Node* B);
+	Muscle(Node* A, Node* B, float expandLength, float contractLength);
 	void update(float dt);
 	void updateClock(float dt);
 	void updateForces(float dt);
@@ -19,10 +19,10 @@ public:
 
 	// physics information
 	float m_expandLength = 100.f;
-	float m_contractLength = 50.f;
+	float m_contractLength = 40.f;
 	float m_restLength;
-	float m_stiffness = 999.f;
-	float m_damping = 20.f;
+	float m_stiffness = 100.f;
+	float m_damping = 10.f;
 
 	// animation information
 	float m_clock; // runs from 0 to 1

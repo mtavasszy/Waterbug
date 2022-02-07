@@ -20,7 +20,7 @@ public:
 	Vec2f m_position;
 	Vec2f m_velocity;
 	Vec2f m_force;
-	float m_mass = 1.f;
+	float m_mass = 100.f;
 
 	// drawing information
 	float m_nodeRadius = 12.f;

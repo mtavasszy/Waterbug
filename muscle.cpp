@@ -2,13 +2,15 @@
 #include "node.h"
 #include "Vec2.h"
 
-Muscle::Muscle(Node* A, Node* B)
+Muscle::Muscle(Node* A, Node* B, float expandLength, float contractLength)
 {
 	// Connected nodes
 	m_nodeA = A;
 	m_nodeB = B;
 	//m_nodeA->m_connectedMuscles.push_back(this);
 	//m_nodeB->m_connectedMuscles.push_back(this);
+	m_expandLength = expandLength;
+	m_contractLength = contractLength;
 
 	// Clock
 	m_clock = m_clockStart;
@@ -33,30 +35,26 @@ void Muscle::updateClock(float dt)
 	}
 	if (m_clock > m_contractTime) {
 		m_restLength = m_contractLength;
-		m_nodeA->m_fillColor = sf::Color::Blue;
-		m_nodeB->m_fillColor = sf::Color::Blue;
 	}
 	else {
 		m_restLength = m_expandLength;
-		m_nodeA->m_fillColor = sf::Color::Red;
-		m_nodeB->m_fillColor = sf::Color::Red;
 	}
 }
 
 void Muscle::updateForces(float dt)
 {
 	Vec2f d_p = m_nodeB->m_position - m_nodeA->m_position;
-	Vec2f d_v = m_nodeB->m_velocity - m_nodeA->m_position;
+	Vec2f d_v = m_nodeB->m_velocity - m_nodeA->m_velocity;
 	float dist = d_p.getLength();
 	d_p /= dist; // normalize
 
-	float F_s = dist * m_stiffness;
+	float F_s = (dist - m_restLength) * m_stiffness;
 	float F_d = Vec2f::dot(d_p, d_v) * m_damping;
 
 	float F_t = F_s + F_d;
 
-	m_nodeA->m_force = F_t * d_p;
-	m_nodeB->m_force = F_t * -d_p;
+	m_nodeA->m_force += F_t * d_p;
+	m_nodeB->m_force += F_t * -d_p;
 }
 
 inline sf::Vector2f toSFVec(Vec2f v) {
