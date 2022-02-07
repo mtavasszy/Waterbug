@@ -2,21 +2,21 @@
 #include "node.h"
 #include "Vec2.h"
 
-Muscle::Muscle(Node* A, Node* B, float expandLength, float contractLength)
+Muscle::Muscle(Node* A, Node* B, float expandLength, float contractLength, float clockStart, float contractTime)
 {
-	// Connected nodes
+	// connected nodes
 	m_nodeA = A;
 	m_nodeB = B;
-	//m_nodeA->m_connectedMuscles.push_back(this);
-	//m_nodeB->m_connectedMuscles.push_back(this);
 	m_expandLength = expandLength;
 	m_contractLength = contractLength;
 
-	// Clock
+	// clock
+	m_clockStart = clockStart;
 	m_clock = m_clockStart;
 	m_restLength = m_expandLength;
+	m_contractTime = contractTime;
 
-	// Draw
+	// draw
 	for (int i = 0; i < 4; ++i)
 		m_edgeVertices[i].color = sf::Color::White;
 }
@@ -35,9 +35,11 @@ void Muscle::updateClock(float dt)
 	}
 	if (m_clock > m_contractTime) {
 		m_restLength = m_contractLength;
+		m_edgeThickness = m_contractThickness;
 	}
 	else {
 		m_restLength = m_expandLength;
+		m_edgeThickness = m_expandThickness;
 	}
 }
 

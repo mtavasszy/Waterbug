@@ -11,7 +11,7 @@ int main()
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Waterbug", sf::Style::Default, settings);
     window.setFramerateLimit(targetFPS);
 
-    Creature creature = Creature();
+    Creature creature = Creature(true);
 
     while (window.isOpen())
     {
