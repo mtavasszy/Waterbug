@@ -1,8 +1,5 @@
-#define _USE_MATH_DEFINES
-
 #include "node.h"
 #include <SFML/Graphics.hpp>
-#include <math.h>
 #include "Vec2.h"
 
 
@@ -25,7 +22,7 @@ void Node::update(float dt)
 	// euler integration
 	m_velocity += (m_force / m_mass) * dt;
 	m_position += m_velocity * dt;
-	
+
 	// reset force
 	m_force = Vec2f(0.f);
 }

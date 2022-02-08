@@ -15,7 +15,7 @@ public:
 	void generateRandom(Vec2f startPos);
 	void addRandomNode(Vec2f startPos);
 	bool isCrossingMuscle(Vec2f p0, Vec2f p1);
-	void removeLooseNodes();
+	bool hasLooseNodeGroups();
 
 	// simulation
 	void update(float dt);
@@ -23,7 +23,7 @@ public:
 	void updateNodes(float dt);
 
 	// visualization
-	void draw(sf::RenderWindow &window);
+	void draw(sf::RenderWindow& window);
 
 	// attributes
 	std::vector<std::unique_ptr<Node>> m_nodes;
@@ -36,9 +36,9 @@ public:
 
 	// config
 	int m_minStartNodes = 3;
-	int m_maxStartNodes = 6;
+	int m_maxStartNodes = 5;
 	float m_edgeConnectChance = 0.5f;
-	float m_maxEdgeLength = 100.f; 
+	float m_maxEdgeLength = 100.f;
 	float m_minEdgeLength = 40.f;
 };
 

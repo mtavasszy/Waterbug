@@ -3,7 +3,6 @@
 
 #include <SFML/Graphics.hpp>
 #include "Vec2.h"
-#include <vector>
 
 class Muscle;
 class Node {
@@ -13,9 +12,6 @@ public:
 
 	void update(float dt);
 	void draw(sf::RenderWindow& window);
-
-	// 
-	std::vector<Muscle*> m_connectedMuscles;
 
 	// physics information
 	Vec2f m_position;

@@ -1,7 +1,8 @@
 #include "creature.h"
 #include "node.h"
 #include "Vec2.h"
-#include <list>
+#include <queue>
+#include <set>
 
 
 Creature::Creature(bool init, Vec2f startPos) {
@@ -16,8 +17,7 @@ Creature::Creature(bool init, Vec2f startPos) {
 			m_nodes.clear();
 			m_muscles.clear();
 			generateRandom(startPos);
-		} 
-		while (m_nodes.size() <= m_minStartNodes);
+		} while (hasLooseNodeGroups());
 	}
 }
 
@@ -30,8 +30,6 @@ void Creature::generateRandom(Vec2f startPos)
 	for (int i = 0; i < nNodes; i++) {
 		addRandomNode(startPos);
 	}
-
-	removeLooseNodes();
 }
 
 void Creature::addRandomNode(Vec2f startPos)
@@ -42,12 +40,10 @@ void Creature::addRandomNode(Vec2f startPos)
 	Vec2f pos = Vec2f(dis_pos(m_gen), dis_pos(m_gen)) + startPos;
 	m_nodes.push_back(std::make_unique<Node>(Node(pos)));
 
+	// connect muscles
 	if (m_nodes.size() > 1) {
-		auto dis_node = std::uniform_int_distribution<int>(0, m_nodes.size() - 2);
-
-		// randomly connect to other nodes too
-		for (int i = 0; i < m_nodes.size() - 2; i++) {
-			if (dis_norm(m_gen) < m_edgeConnectChance && !isCrossingMuscle(pos, m_nodes[i]->m_position)) {
+		for (int i = 0; i < m_nodes.size() - 1; i++) {
+			if (dis_norm(m_gen) < m_edgeConnectChance/* && !isCrossingMuscle(pos, m_nodes[i]->m_position)*/) {
 				m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_nodes.back().get(), m_nodes[i].get(), m_maxEdgeLength, m_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
 			}
 		}
@@ -82,14 +78,28 @@ bool Creature::isCrossingMuscle(Vec2f p0, Vec2f p1)
 	return false;
 }
 
-void Creature::removeLooseNodes()
+bool Creature::hasLooseNodeGroups()
 {
-	for (int i = 0; i < m_nodes.size(); i++) {
-		if (m_nodes[i]->m_connectedMuscles.empty()) {
-			m_nodes.erase(m_nodes.begin() + i);
-			i--;
+	std::queue<Node*> nodesToVisit;
+	std::set<Node*> visitedNodes;
+	nodesToVisit.push(m_nodes[0].get());
+
+	while (!nodesToVisit.empty()) {
+		Node* n = nodesToVisit.front();
+		visitedNodes.insert(n);
+		nodesToVisit.pop();
+
+		for (int j = 0; j < m_muscles.size(); j++) {
+			if (m_muscles[j]->m_nodeA->m_position == n->m_position && visitedNodes.count(m_muscles[j]->m_nodeB) == 0) {
+				nodesToVisit.push(m_muscles[j]->m_nodeB);
+			}
+			if (m_muscles[j]->m_nodeB->m_position == n->m_position && visitedNodes.count(m_muscles[j]->m_nodeA) == 0) {
+				nodesToVisit.push(m_muscles[j]->m_nodeA);
+			}
 		}
 	}
+
+	return visitedNodes.size() != m_nodes.size();
 }
 
 void Creature::update(float dt) {
