@@ -12,7 +12,6 @@ public:
 	Creature(bool init);
 
 	// structure
-	float rnd();
 	void generateRandom();
 
 	// simulation
@@ -24,8 +23,8 @@ public:
 	void draw(sf::RenderWindow &window);
 
 	// attributes
-	std::vector<Node> m_nodes;
-	std::vector<Muscle> m_muscles;
+	std::vector<std::unique_ptr<Node>> m_nodes;
+	std::vector< std::unique_ptr<Muscle>> m_muscles;
 
 	// random
 	std::mt19937 m_gen;
@@ -36,7 +35,7 @@ public:
 	int m_minStartNodes = 3;
 	int m_maxStartNodes = 6;
 	float m_edgeConnectChance = 0.5f;
-	float m_maxEdgeLength = 100.f;
+	float m_maxEdgeLength = 100.f; 
 	float m_minEdgeLength = 40.f;
 };
 

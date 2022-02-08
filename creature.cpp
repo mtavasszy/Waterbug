@@ -43,19 +43,25 @@ void Creature::generateRandom()
 	auto dis_pos = std::uniform_real_distribution<float>(300.f, 400.f);
 	auto dis_norm = std::uniform_real_distribution<float>(0.f, 1.f);
 
+	// add nodes
 	for (int i = 0; i < nNodes; i++) {
 		Vec2f pos = Vec2f(dis_pos(m_gen), dis_pos(m_gen));
-		m_nodes.push_back(Node(pos));
+		m_nodes.push_back(std::make_unique<Node>(Node(pos)));
+	}
 
-		if (i > 0) {
-			auto dis_node = std::uniform_int_distribution<int>(0, i - 1);
-			int connectingNode = dis_node(m_gen);
-			m_muscles.push_back(Muscle(&m_nodes[i], &m_nodes[connectingNode], m_maxEdgeLength, m_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen)));
+	// connect muscles
+	for (int i = 0; i < nNodes; i++) {
+		for (int j = 0; j < i; j++) {
+			if (i > 0) {
+				auto dis_node = std::uniform_int_distribution<int>(0, i - 1);
+				int connectingNode = dis_node(m_gen);
+				m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_nodes[i].get(), m_nodes[connectingNode].get(), m_maxEdgeLength, m_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
 
-			// randomly connect to other nodes too
-			for (int j = 0; j < i; j++) {
-				if (j != connectingNode && dis_norm(m_gen) < m_edgeConnectChance) {
-					m_muscles.push_back(Muscle(&m_nodes[j], &m_nodes[i], m_maxEdgeLength, m_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen)));
+				// randomly connect to other nodes too
+				for (int k = 0; k < i - 1; k++) {
+					if (i != connectingNode && dis_norm(m_gen) < m_edgeConnectChance) {
+						m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_nodes[i].get(), m_nodes[k].get(), m_maxEdgeLength, m_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
+					}
 				}
 			}
 		}
@@ -69,23 +75,23 @@ void Creature::update(float dt) {
 
 void Creature::updateMuscles(float dt)
 {
-	for (auto it = m_muscles.begin(); it != m_muscles.end(); it++) {
-		it->update(dt);
+	for (int i = 0; i < m_muscles.size(); i++) {
+		m_muscles[i]->update(dt);
 	}
 }
 
 void Creature::updateNodes(float dt)
 {
-	for (auto it = m_nodes.begin(); it != m_nodes.end(); it++) {
-		it->update(dt);
+	for (int i = 0; i < m_nodes.size(); i++) {
+		m_nodes[i]->update(dt);
 	}
 }
 
 void Creature::draw(sf::RenderWindow& window) {
-	for (auto it = m_muscles.begin(); it != m_muscles.end(); it++) {
-		it->draw(window);
+	for (int i = 0; i < m_muscles.size(); i++) {
+		m_muscles[i]->draw(window);
 	}
-	for (auto it = m_nodes.begin(); it != m_nodes.end(); it++) {
-		it->draw(window);
+	for (int i = 0; i < m_nodes.size(); i++) {
+		m_nodes[i]->draw(window);
 	}
 }
