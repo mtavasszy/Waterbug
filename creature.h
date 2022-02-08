@@ -9,10 +9,13 @@
 class Creature {
 
 public:
-	Creature(bool init);
+	Creature(bool init, Vec2f startPos);
 
 	// structure
-	void generateRandom();
+	void generateRandom(Vec2f startPos);
+	void addRandomNode(Vec2f startPos);
+	bool isCrossingMuscle(Vec2f p0, Vec2f p1);
+	void removeLooseNodes();
 
 	// simulation
 	void update(float dt);

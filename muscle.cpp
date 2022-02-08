@@ -4,6 +4,9 @@
 
 Muscle::Muscle(Node* A, Node* B, float expandLength, float contractLength, float clockStart, float contractTime)
 {
+	A->m_connectedMuscles.push_back(this);
+	B->m_connectedMuscles.push_back(this);
+
 	// connected nodes
 	m_nodeA = A;
 	m_nodeB = B;

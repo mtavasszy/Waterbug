@@ -1,29 +1,10 @@
 #include "creature.h"
 #include "node.h"
 #include "Vec2.h"
+#include <list>
 
 
-Creature::Creature(bool init) {
-	//m_nodes.push_back(Node(Vec2f(300.f, 300.f)));
-	//m_nodes.push_back(Node(Vec2f(400.f, 300.f)));
-	//m_nodes.push_back(Node(Vec2f(350.f, 386.f)));
-
-	//m_muscles.push_back(Muscle(&m_nodes[0], &m_nodes[1], 100, 30));
-	//m_muscles.push_back(Muscle(&m_nodes[1], &m_nodes[2], 100, 50));
-	//m_muscles.push_back(Muscle(&m_nodes[2], &m_nodes[0], 100, 40));
-
-	//m_nodes.push_back(Node(Vec2f(300.f, 300.f)));
-	//m_nodes.push_back(Node(Vec2f(400.f, 300.f)));
-	//m_nodes.push_back(Node(Vec2f(300.f, 400.f)));
-	//m_nodes.push_back(Node(Vec2f(400.f, 400.f)));
-
-	//m_muscles.push_back(Muscle(&m_nodes[0], &m_nodes[1], 100, 40));
-	//m_muscles.push_back(Muscle(&m_nodes[1], &m_nodes[3], 100, 40));
-	//m_muscles.push_back(Muscle(&m_nodes[3], &m_nodes[2], 100, 40));
-	//m_muscles.push_back(Muscle(&m_nodes[2], &m_nodes[0], 100, 40));
-	//m_muscles.push_back(Muscle(&m_nodes[3], &m_nodes[0], 141, 55));
-	//m_muscles.push_back(Muscle(&m_nodes[1], &m_nodes[2], 141, 55));
-
+Creature::Creature(bool init, Vec2f startPos) {
 	// random
 	std::random_device rd;
 	m_gen = std::mt19937(rd()); // Standard mersenne_twister_engine seeded with rd()
@@ -31,39 +12,82 @@ Creature::Creature(bool init) {
 	m_dis_real = std::uniform_real_distribution<>(0.f, 1.f);
 
 	if (init) {
-		generateRandom();
+		do {
+			m_nodes.clear();
+			m_muscles.clear();
+			generateRandom(startPos);
+		} 
+		while (m_nodes.size() <= m_minStartNodes);
 	}
 }
 
-void Creature::generateRandom()
+void Creature::generateRandom(Vec2f startPos)
 {
 	auto dis_nodes = std::uniform_int_distribution<int>(m_minStartNodes, m_maxStartNodes);
 	int nNodes = dis_nodes(m_gen);
 
-	auto dis_pos = std::uniform_real_distribution<float>(300.f, 400.f);
-	auto dis_norm = std::uniform_real_distribution<float>(0.f, 1.f);
-
 	// add nodes
 	for (int i = 0; i < nNodes; i++) {
-		Vec2f pos = Vec2f(dis_pos(m_gen), dis_pos(m_gen));
-		m_nodes.push_back(std::make_unique<Node>(Node(pos)));
+		addRandomNode(startPos);
 	}
 
-	// connect muscles
-	for (int i = 0; i < nNodes; i++) {
-		for (int j = 0; j < i; j++) {
-			if (i > 0) {
-				auto dis_node = std::uniform_int_distribution<int>(0, i - 1);
-				int connectingNode = dis_node(m_gen);
-				m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_nodes[i].get(), m_nodes[connectingNode].get(), m_maxEdgeLength, m_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
+	removeLooseNodes();
+}
 
-				// randomly connect to other nodes too
-				for (int k = 0; k < i - 1; k++) {
-					if (i != connectingNode && dis_norm(m_gen) < m_edgeConnectChance) {
-						m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_nodes[i].get(), m_nodes[k].get(), m_maxEdgeLength, m_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
-					}
-				}
+void Creature::addRandomNode(Vec2f startPos)
+{
+	auto dis_pos = std::uniform_real_distribution<float>(0.f, 100.f);
+	auto dis_norm = std::uniform_real_distribution<float>(0.f, 1.f);
+
+	Vec2f pos = Vec2f(dis_pos(m_gen), dis_pos(m_gen)) + startPos;
+	m_nodes.push_back(std::make_unique<Node>(Node(pos)));
+
+	if (m_nodes.size() > 1) {
+		auto dis_node = std::uniform_int_distribution<int>(0, m_nodes.size() - 2);
+
+		// randomly connect to other nodes too
+		for (int i = 0; i < m_nodes.size() - 2; i++) {
+			if (dis_norm(m_gen) < m_edgeConnectChance && !isCrossingMuscle(pos, m_nodes[i]->m_position)) {
+				m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_nodes.back().get(), m_nodes[i].get(), m_maxEdgeLength, m_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
 			}
+		}
+	}
+}
+
+bool Creature::isCrossingMuscle(Vec2f p0, Vec2f p1)
+{
+	const Vec2f p = p0;
+	const Vec2f r = p1 - p0;
+
+	for (int i = 0; i < m_muscles.size(); i++) {
+		const Vec2f m0 = m_muscles[i]->m_nodeA->m_position;
+		const Vec2f m1 = m_muscles[i]->m_nodeB->m_position;
+
+		if (p0 == m0 || p0 == m1 || p1 == m0 || p1 == m1)
+			continue; // lines start at same node
+
+		const Vec2f q = m0;
+		const Vec2f s = m1 - m0;
+
+		float t, u;
+		t = (-r.y * (p.x - q.x) + r.x * (p.y - q.y)) / (-s.x * r.y + r.x * s.y);
+		u = (s.x * (p.y - q.y) - s.y * (p.x - q.x)) / (-s.x * r.y + r.x * s.y);
+
+		if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void Creature::removeLooseNodes()
+{
+	for (int i = 0; i < m_nodes.size(); i++) {
+		if (m_nodes[i]->m_connectedMuscles.empty()) {
+			m_nodes.erase(m_nodes.begin() + i);
+			i--;
 		}
 	}
 }
