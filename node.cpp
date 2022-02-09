@@ -1,13 +1,15 @@
 #include "node.h"
 #include <SFML/Graphics.hpp>
 #include "Vec2.h"
+#include "config.h"
 
 
 Node::Node(Vec2f position) {
 	// physics
 	m_position = position;
 	m_velocity = Vec2f(0.f);
-	m_force = Vec2f(0.f);
+	m_internalforce = Vec2f(0.f);
+	m_externalForce = Vec2f(0.f);
 	m_mass = 1;
 
 	// draw
@@ -20,11 +22,14 @@ Node::Node(Vec2f position) {
 void Node::update(float dt)
 {
 	// euler integration
-	m_velocity += (m_force / m_mass) * dt;
+	Vec2f force = m_internalforce + m_externalForce;
+	m_velocity += (force / m_mass) * dt;
+	m_velocity *= powf(Config::waterFriction, dt);
 	m_position += m_velocity * dt;
 
-	// reset force
-	m_force = Vec2f(0.f);
+	// reset forces
+	m_internalforce = Vec2f(0.f);
+	m_externalForce = Vec2f(0.f);
 }
 
 inline sf::Vector2f toSFVec(Vec2f v) {

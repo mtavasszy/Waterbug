@@ -1,4 +1,5 @@
 #include "creature.h"
+#include "config.h"
 #include "node.h"
 #include "Vec2.h"
 #include <queue>
@@ -23,7 +24,7 @@ Creature::Creature(bool init, Vec2f startPos) {
 
 void Creature::generateRandom(Vec2f startPos)
 {
-	auto dis_nodes = std::uniform_int_distribution<int>(m_minStartNodes, m_maxStartNodes);
+	auto dis_nodes = std::uniform_int_distribution<int>(Config::creature_minNodes, Config::creature_maxNodes);
 	int nNodes = dis_nodes(m_gen);
 
 	// add nodes
@@ -43,8 +44,8 @@ void Creature::addRandomNode(Vec2f startPos)
 	// connect muscles
 	if (m_nodes.size() > 1) {
 		for (int i = 0; i < m_nodes.size() - 1; i++) {
-			if (dis_norm(m_gen) < m_edgeConnectChance/* && !isCrossingMuscle(pos, m_nodes[i]->m_position)*/) {
-				m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_nodes.back().get(), m_nodes[i].get(), m_maxEdgeLength, m_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
+			if (dis_norm(m_gen) < Config::creature_edgeConnectChance/* && !isCrossingMuscle(pos, m_nodes[i]->m_position)*/) {
+				m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_nodes.back().get(), m_nodes[i].get(), Config::creature_maxEdgeLength, Config::creature_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
 			}
 		}
 	}
@@ -110,7 +111,11 @@ void Creature::update(float dt) {
 void Creature::updateMuscles(float dt)
 {
 	for (int i = 0; i < m_muscles.size(); i++) {
-		m_muscles[i]->update(dt);
+		m_muscles[i]->updateClock(dt);
+		m_muscles[i]->updateInternalForces(dt);
+	}
+	for (int i = 0; i < m_muscles.size(); i++) {
+		m_muscles[i]->updateExternalForces(dt);
 	}
 }
 

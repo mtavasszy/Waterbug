@@ -33,13 +33,6 @@ public:
 	std::mt19937 m_gen;
 	std::uniform_real_distribution<> m_dis_real;
 	std::uniform_int_distribution<> m_dis_int;
-
-	// config
-	int m_minStartNodes = 3;
-	int m_maxStartNodes = 5;
-	float m_edgeConnectChance = 0.5f;
-	float m_maxEdgeLength = 100.f;
-	float m_minEdgeLength = 40.f;
 };
 
 #endif  // CREATURE_H_

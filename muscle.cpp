@@ -1,6 +1,7 @@
 #include "muscle.h"
 #include "node.h"
 #include "Vec2.h"
+#include "config.h"
 
 Muscle::Muscle(Node* A, Node* B, float expandLength, float contractLength, float clockStart, float contractTime)
 {
@@ -21,12 +22,6 @@ Muscle::Muscle(Node* A, Node* B, float expandLength, float contractLength, float
 		m_edgeVertices[i].color = sf::Color::White;
 }
 
-void Muscle::update(float dt)
-{
-	updateClock(dt);
-	updateForces(dt);
-}
-
 void Muscle::updateClock(float dt)
 {
 	m_clock += m_clockSpeed * dt;
@@ -43,7 +38,7 @@ void Muscle::updateClock(float dt)
 	}
 }
 
-void Muscle::updateForces(float dt)
+void Muscle::updateInternalForces(float dt)
 {
 	Vec2f d_p = m_nodeB->m_position - m_nodeA->m_position;
 	Vec2f d_v = m_nodeB->m_velocity - m_nodeA->m_velocity;
@@ -55,8 +50,19 @@ void Muscle::updateForces(float dt)
 
 	float F_t = F_s + F_d;
 
-	m_nodeA->m_force += F_t * d_p;
-	m_nodeB->m_force += F_t * -d_p;
+	m_nodeA->m_internalforce += F_t * d_p;
+	m_nodeB->m_internalforce += F_t * -d_p;
+}
+
+void Muscle::updateExternalForces(float dt)
+{
+	Vec2f normal = Vec2f::getOrthogonal(m_nodeB->m_position - m_nodeA->m_position).normalize();
+
+	float res_A = Vec2f::dot(normal, m_nodeA->m_internalforce);
+	m_nodeA->m_externalForce += -normal * res_A * Config::waterResistance;
+
+	float res_B = Vec2f::dot(normal, m_nodeB->m_internalforce);
+	m_nodeB->m_externalForce += -normal * res_B * Config::waterResistance;
 }
 
 inline sf::Vector2f toSFVec(Vec2f v) {

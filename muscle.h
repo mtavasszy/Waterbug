@@ -11,9 +11,9 @@ class Muscle {
 
 public:
 	Muscle(Node* A, Node* B, float expandLength, float contractLength, float clockStart, float contractTime);
-	void update(float dt);
 	void updateClock(float dt);
-	void updateForces(float dt);
+	void updateInternalForces(float dt);
+	void updateExternalForces(float dt);
 	void draw(sf::RenderWindow& window);
 
 	Node* m_nodeA;

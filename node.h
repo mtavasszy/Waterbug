@@ -16,7 +16,8 @@ public:
 	// physics information
 	Vec2f m_position;
 	Vec2f m_velocity;
-	Vec2f m_force;
+	Vec2f m_internalforce;
+	Vec2f m_externalForce;
 	float m_mass = 100.f;
 
 	// drawing information
