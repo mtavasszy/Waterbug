@@ -19,12 +19,16 @@ Node::Node(Vec2f position) {
 	m_circle.setOutlineThickness(-2.f);
 }
 
-void Node::update(float dt)
+void Node::updateExternalForces(float dt)
+{
+	m_externalForce += -0.5f * m_velocity.getLength() * powf(Config::waterDragCoef, dt) * m_velocity;
+}
+
+void Node::applyForces(float dt)
 {
 	// euler integration
 	Vec2f force = m_internalforce + m_externalForce;
 	m_velocity += (force / m_mass) * dt;
-	m_velocity *= powf(Config::waterFriction, dt);
 	m_position += m_velocity * dt;
 
 	// reset forces

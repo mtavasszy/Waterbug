@@ -5,7 +5,6 @@
 #include <queue>
 #include <set>
 
-
 Creature::Creature(bool init, Vec2f startPos) {
 	// random
 	std::random_device rd;
@@ -20,6 +19,9 @@ Creature::Creature(bool init, Vec2f startPos) {
 			generateRandom(startPos);
 		} while (hasLooseNodeGroups());
 	}
+
+	// stabilize creature
+	// recenter
 }
 
 void Creature::generateRandom(Vec2f startPos)
@@ -122,8 +124,20 @@ void Creature::updateMuscles(float dt)
 void Creature::updateNodes(float dt)
 {
 	for (int i = 0; i < m_nodes.size(); i++) {
-		m_nodes[i]->update(dt);
+		m_nodes[i]->updateExternalForces(dt);
+		m_nodes[i]->applyForces(dt);
 	}
+}
+
+Vec2f Creature::getCenter()
+{
+	Vec2f center = Vec2f(0.f);
+
+	for (int i = 0; i < m_nodes.size(); i++) {
+		center += m_nodes[i]->m_position;
+	}
+
+	return center / float(m_nodes.size());
 }
 
 void Creature::draw(sf::RenderWindow& window) {

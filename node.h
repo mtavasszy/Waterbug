@@ -10,7 +10,8 @@ class Node {
 public:
 	Node(Vec2f position);
 
-	void update(float dt);
+	void updateExternalForces(float dt);
+	void applyForces(float dt);
 	void draw(sf::RenderWindow& window);
 
 	// physics information

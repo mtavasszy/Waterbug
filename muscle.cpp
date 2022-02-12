@@ -58,11 +58,13 @@ void Muscle::updateExternalForces(float dt)
 {
 	Vec2f normal = Vec2f::getOrthogonal(m_nodeB->m_position - m_nodeA->m_position).normalize();
 
+	float muscleExtentionRatio = Vec2f::distance(m_nodeA->m_position, m_nodeB->m_position) / Config::creature_maxEdgeLength;
+
 	float res_A = Vec2f::dot(normal, m_nodeA->m_internalforce);
-	m_nodeA->m_externalForce += -normal * res_A * Config::waterResistance;
+	m_nodeA->m_externalForce += -normal * res_A * muscleExtentionRatio * Config::waterFrictionCoef;
 
 	float res_B = Vec2f::dot(normal, m_nodeB->m_internalforce);
-	m_nodeB->m_externalForce += -normal * res_B * Config::waterResistance;
+	m_nodeB->m_externalForce += -normal * res_B * muscleExtentionRatio * Config::waterFrictionCoef;
 }
 
 inline sf::Vector2f toSFVec(Vec2f v) {

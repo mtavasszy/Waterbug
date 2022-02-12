@@ -6,10 +6,10 @@
 class Config {
 public:
 	// app
-	static constexpr float screen_w = 1280;
-	static constexpr float screen_h = 720;
+	static constexpr float screen_w = 1280.f;
+	static constexpr float screen_h = 720.f;
 	static constexpr int n_creatures = 100;
-	static constexpr int runTime = 15; // seconds
+	static constexpr int runTime = 10; // seconds
 	static constexpr int runFPS = 60;
 	static constexpr float dt = 1.f / float(runFPS);
 
@@ -21,8 +21,8 @@ public:
 	static constexpr float creature_minEdgeLength = 40.f;
 
 	// simulation physics
-	static constexpr float waterResistance = 0.3;
-	static constexpr float waterFriction = 0.4;
+	static constexpr float waterDragCoef = 0.2f;
+	static constexpr float waterFrictionCoef = 0.5f;
 };
 
 #endif  // CONFIG_H_

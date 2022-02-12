@@ -21,6 +21,7 @@ public:
 	void update(float dt);
 	void updateMuscles(float dt);
 	void updateNodes(float dt);
+	Vec2f getCenter();
 
 	// visualization
 	void draw(sf::RenderWindow& window);
@@ -28,6 +29,7 @@ public:
 	// attributes
 	std::vector<std::unique_ptr<Node>> m_nodes;
 	std::vector< std::unique_ptr<Muscle>> m_muscles;
+	float m_fitness;
 
 	// random
 	std::mt19937 m_gen;
