@@ -55,9 +55,9 @@ inline sf::Vector2f toSFVec(Vec2f v) {
 	return sf::Vector2f(v.x, v.y);
 }
 
-void Node::Draw(sf::RenderWindow& window)
+void Node::Draw(sf::RenderWindow& window, Vec2f camPos)
 {
-	m_circle.setPosition(toSFVec(m_position - m_circle.getRadius()));
+	m_circle.setPosition(toSFVec(m_position - m_circle.getRadius() - camPos));
 	m_circle.setFillColor(m_fillColor);
 	window.draw(m_circle);
 }

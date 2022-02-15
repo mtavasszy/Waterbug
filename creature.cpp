@@ -5,7 +5,7 @@
 #include <queue>
 #include <set>
 
-Creature::Creature(bool init, Vec2f startPos) {
+Creature::Creature(bool init) {
 
 	// random
 	std::random_device rd;
@@ -17,12 +17,12 @@ Creature::Creature(bool init, Vec2f startPos) {
 		do {
 			m_nodes.clear();
 			m_muscles.clear();
-			GenerateRandom(startPos);
+			GenerateRandom();
 		} while (HasLooseNodeGroups());
 	}
 
 	// stabilize creature
-	// recenter
+	ReCenter();
 }
 
 Creature::Creature(const Creature* c)
@@ -39,30 +39,49 @@ Creature::Creature(const Creature* c)
 	}
 }
 
-void Creature::GenerateRandom(Vec2f startPos)
+void Creature::GenerateRandom()
 {
 	auto dis_nodes = std::uniform_int_distribution<int>(Config::creature_minNodes, Config::creature_maxNodes);
 	int nNodes = dis_nodes(m_gen);
 
 	// add nodes
 	for (int i = 0; i < nNodes; i++) {
-		AddRandomNode(startPos);
+		AddRandomNode();
 	}
 }
 
-void Creature::AddRandomNode(Vec2f startPos)
+void Creature::ReCenter()
 {
-	auto dis_pos = std::uniform_real_distribution<float>(0.f, 100.f);
+	Vec2f center = GetCenter();
+	for (int i = 0; i < m_nodes.size(); i++) {
+		m_nodes[i]->m_position -= center;
+	}
+}
+
+Vec2f Creature::GetCenter()
+{
+	Vec2f center = Vec2f(0.f);
+
+	for (int i = 0; i < m_nodes.size(); i++) {
+		center += m_nodes[i]->m_position;
+	}
+
+	return center / float(m_nodes.size());
+}
+
+void Creature::AddRandomNode()
+{
+	auto dis_pos = std::uniform_real_distribution<float>(-50.f, 50.f);
 	auto dis_norm = std::uniform_real_distribution<float>(0.f, 1.f);
 
-	Vec2f pos = Vec2f(dis_pos(m_gen), dis_pos(m_gen)) + startPos;
+	Vec2f pos = Vec2f(dis_pos(m_gen), dis_pos(m_gen));
 	m_nodes.push_back(std::make_unique<Node>(Node(pos)));
 
 	// connect muscles
 	if (m_nodes.size() > 1) {
 		for (int i = 0; i < m_nodes.size() - 1; i++) {
 			if (dis_norm(m_gen) < Config::creature_edgeConnectChance/* && !isCrossingMuscle(pos, m_nodes[i]->m_position)*/) {
-				m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_nodes.size()-1, i, m_nodes.back().get(), m_nodes[i].get(), Config::creature_maxEdgeLength, Config::creature_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
+				m_muscles.push_back(std::make_unique<Muscle>(Muscle(int(m_nodes.size())-1, i, m_nodes.back().get(), m_nodes[i].get(), Config::creature_maxEdgeLength, Config::creature_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
 			}
 		}
 	}
@@ -144,22 +163,11 @@ void Creature::UpdateNodes(float dt)
 	}
 }
 
-Vec2f Creature::GetCenter()
-{
-	Vec2f center = Vec2f(0.f);
-
-	for (int i = 0; i < m_nodes.size(); i++) {
-		center += m_nodes[i]->m_position;
-	}
-
-	return center / float(m_nodes.size());
-}
-
-void Creature::Draw(sf::RenderWindow& window) {
+void Creature::Draw(sf::RenderWindow& window, Vec2f camPos) {
 	for (int i = 0; i < m_muscles.size(); i++) {
-		m_muscles[i]->Draw(window);
+		m_muscles[i]->Draw(window, camPos);
 	}
 	for (int i = 0; i < m_nodes.size(); i++) {
-		m_nodes[i]->Draw(window);
+		m_nodes[i]->Draw(window, camPos);
 	}
 }

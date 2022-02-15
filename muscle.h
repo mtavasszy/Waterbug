@@ -15,7 +15,7 @@ public:
 	void UpdateClock(float dt);
 	void UpdateInternalForces(float dt);
 	void UpdateExternalForces(float dt);
-	void Draw(sf::RenderWindow& window);
+	void Draw(sf::RenderWindow& window, Vec2f camPos);
 
 	int m_nodeAIndex, m_nodeBIndex; // used for cloning the object
 	Node* m_nodeA;

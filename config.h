@@ -6,8 +6,8 @@
 class Config {
 public:
 	// app
-	static constexpr float screen_w = 1280.f;
-	static constexpr float screen_h = 720.f;
+	static constexpr int screen_w = 1280;
+	static constexpr int screen_h = 720;
 	static constexpr int n_creatures = 100;
 	static constexpr int runTime = 10; // seconds
 	static constexpr int runFPS = 60;

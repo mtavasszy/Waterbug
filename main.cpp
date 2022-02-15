@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include "config.h"
 #include "creature.h"
 #include "Vec2.h"
 #include <vector>
@@ -10,16 +11,16 @@ int main()
 
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
-	sf::RenderWindow window(sf::VideoMode(1280, 720), "Waterbug", sf::Style::Default, settings);
+	sf::RenderWindow window(sf::VideoMode(Config::screen_w, Config::screen_h), "Waterbug", sf::Style::Default, settings);
 	window.setFramerateLimit(targetFPS);
 
 	std::vector<Creature> creatures;
-	for (int x = 0; x < 6; x++) {
-		for (int y = 0; y < 3; y++) {
-			Vec2f pos = Vec2f(x * 200 + 50, y * 200 + 50);
-			creatures.push_back(Creature(true, pos));
-		}
-	}
+	//for (int x = 0; x < 6; x++) {
+	//	for (int y = 0; y < 3; y++) {
+	//		Vec2f pos = Vec2f(x * 200 + 50, y * 200 + 50);
+			creatures.push_back(Creature(true));
+	//	}
+	//}
 	for (auto it = creatures.begin(); it != creatures.end(); it++) {
 		it->Update(dt);
 	}
@@ -35,7 +36,7 @@ int main()
 		window.clear(sf::Color(14, 135, 204, 255));
 		for (auto it = creatures.begin(); it != creatures.end(); it++) {
 			it->Update(dt);
-			it->Draw(window);
+			it->Draw(window, -Vec2f(float(Config::screen_w)/2.f, float(Config::screen_h)/2.f));
 		}
 		window.display();
 	}

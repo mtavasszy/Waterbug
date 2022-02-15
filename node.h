@@ -13,7 +13,7 @@ public:
 
 	void UpdateExternalForces(float dt);
 	void ApplyForces(float dt);
-	void Draw(sf::RenderWindow& window);
+	void Draw(sf::RenderWindow& window, Vec2f camPos);
 
 	// physics information
 	Vec2f m_position;

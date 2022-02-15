@@ -100,7 +100,7 @@ inline sf::Vector2f toSFVec(Vec2f v) {
 	return sf::Vector2f(v.x, v.y);
 }
 
-void Muscle::Draw(sf::RenderWindow& window)
+void Muscle::Draw(sf::RenderWindow& window, Vec2f camPos)
 {
 	Vec2f direction = m_nodeA->m_position - m_nodeB->m_position;
 	Vec2f unitDirection = direction.normalize();
@@ -108,10 +108,10 @@ void Muscle::Draw(sf::RenderWindow& window)
 
 	Vec2f offset = (m_edgeThickness / 2.f) * unitPerpendicular;
 
-	m_edgeVertices[0].position = toSFVec(m_nodeA->m_position + offset);
-	m_edgeVertices[1].position = toSFVec(m_nodeB->m_position + offset);
-	m_edgeVertices[2].position = toSFVec(m_nodeB->m_position - offset);
-	m_edgeVertices[3].position = toSFVec(m_nodeA->m_position - offset);
+	m_edgeVertices[0].position = toSFVec(m_nodeA->m_position + offset - camPos);
+	m_edgeVertices[1].position = toSFVec(m_nodeB->m_position + offset - camPos);
+	m_edgeVertices[2].position = toSFVec(m_nodeB->m_position - offset - camPos);
+	m_edgeVertices[3].position = toSFVec(m_nodeA->m_position - offset - camPos);
 
 	window.draw(m_edgeVertices, 4, sf::Quads);
 }
