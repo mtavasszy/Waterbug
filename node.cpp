@@ -19,6 +19,21 @@ Node::Node(Vec2f position) {
 	m_circle.setOutlineThickness(-2.f);
 }
 
+Node::Node(const Node* n)
+{
+	// physics information
+	m_position = n->m_position;
+	m_velocity = n->m_velocity;
+	m_internalforce = n->m_internalforce;
+	m_externalForce = n->m_externalForce;
+	m_mass = n->m_mass;
+
+	// drawing information
+	m_nodeRadius = n->m_nodeRadius;
+	m_circle = n->m_circle;
+	m_fillColor = n->m_fillColor;
+}
+
 void Node::UpdateExternalForces(float dt)
 {
 	m_externalForce += -0.5f * m_velocity.getLength() * powf(Config::waterDragCoef, dt) * m_velocity;

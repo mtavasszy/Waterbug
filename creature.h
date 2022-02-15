@@ -10,6 +10,7 @@ class Creature {
 
 public:
 	Creature(bool init, Vec2f startPos);
+	Creature(const Creature* c);
 
 	// structure
 	void GenerateRandom(Vec2f startPos);
@@ -33,8 +34,6 @@ public:
 
 	// random
 	std::mt19937 m_gen;
-	std::uniform_real_distribution<> m_dis_real;
-	std::uniform_int_distribution<> m_dis_int;
 };
 
 #endif  // CREATURE_H_

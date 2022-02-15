@@ -9,12 +9,15 @@
 class Muscle {
 
 public:
-	Muscle(Node* A, Node* B, float expandLength, float contractLength, float clockStart, float contractTime);
+	Muscle(int A_i, int B_i, Node* A, Node* B, float expandLength, float contractLength, float clockStart, float contractTime);
+	Muscle(const Muscle* m);
+
 	void UpdateClock(float dt);
 	void UpdateInternalForces(float dt);
 	void UpdateExternalForces(float dt);
 	void Draw(sf::RenderWindow& window);
 
+	int m_nodeAIndex, m_nodeBIndex; // used for cloning the object
 	Node* m_nodeA;
 	Node* m_nodeB;
 
@@ -29,7 +32,6 @@ public:
 	float m_clock; // runs from 0 to 1
 	float m_clockStart = 0.f;
 	float m_clockSpeed = 0.5f;
-
 	float m_contractTime = 0.5f;
 
 	// drawing information

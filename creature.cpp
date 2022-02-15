@@ -6,12 +6,13 @@
 #include <set>
 
 Creature::Creature(bool init, Vec2f startPos) {
+
 	// random
 	std::random_device rd;
 	m_gen = std::mt19937(rd()); // Standard mersenne_twister_engine seeded with rd()
-	m_dis_int = std::uniform_int_distribution<>(0, 1);
-	m_dis_real = std::uniform_real_distribution<>(0.f, 1.f);
+	m_fitness = 0.f;
 
+	// init creature
 	if (init) {
 		do {
 			m_nodes.clear();
@@ -22,6 +23,20 @@ Creature::Creature(bool init, Vec2f startPos) {
 
 	// stabilize creature
 	// recenter
+}
+
+Creature::Creature(const Creature* c)
+{
+	m_gen = c->m_gen;
+
+	for (int i = 0; i < c->m_nodes.size(); i++) {
+		m_nodes.push_back(std::make_unique<Node>(Node(c->m_nodes[i].get())));
+	}
+	for (int i = 0; i < c->m_muscles.size(); i++) {
+		m_muscles.push_back(std::make_unique<Muscle>(Muscle(c->m_muscles[i].get())));
+		m_muscles[i]->m_nodeA = m_nodes[m_muscles[i]->m_nodeAIndex].get();
+		m_muscles[i]->m_nodeB = m_nodes[m_muscles[i]->m_nodeBIndex].get();
+	}
 }
 
 void Creature::GenerateRandom(Vec2f startPos)
@@ -47,7 +62,7 @@ void Creature::AddRandomNode(Vec2f startPos)
 	if (m_nodes.size() > 1) {
 		for (int i = 0; i < m_nodes.size() - 1; i++) {
 			if (dis_norm(m_gen) < Config::creature_edgeConnectChance/* && !isCrossingMuscle(pos, m_nodes[i]->m_position)*/) {
-				m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_nodes.back().get(), m_nodes[i].get(), Config::creature_maxEdgeLength, Config::creature_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
+				m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_nodes.size()-1, i, m_nodes.back().get(), m_nodes[i].get(), Config::creature_maxEdgeLength, Config::creature_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
 			}
 		}
 	}

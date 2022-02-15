@@ -9,6 +9,7 @@ class Node {
 
 public:
 	Node(Vec2f position);
+	Node(const Node* n);
 
 	void UpdateExternalForces(float dt);
 	void ApplyForces(float dt);
