@@ -12,19 +12,19 @@ public:
 	Creature(bool init, Vec2f startPos);
 
 	// structure
-	void generateRandom(Vec2f startPos);
-	void addRandomNode(Vec2f startPos);
-	bool isCrossingMuscle(Vec2f p0, Vec2f p1);
-	bool hasLooseNodeGroups();
+	void GenerateRandom(Vec2f startPos);
+	void AddRandomNode(Vec2f startPos);
+	bool IsCrossingMuscle(Vec2f p0, Vec2f p1);
+	bool HasLooseNodeGroups();
 
 	// simulation
-	void update(float dt);
-	void updateMuscles(float dt);
-	void updateNodes(float dt);
-	Vec2f getCenter();
+	void Update(float dt);
+	void UpdateMuscles(float dt);
+	void UpdateNodes(float dt);
+	Vec2f GetCenter();
 
 	// visualization
-	void draw(sf::RenderWindow& window);
+	void Draw(sf::RenderWindow& window);
 
 	// attributes
 	std::vector<std::unique_ptr<Node>> m_nodes;

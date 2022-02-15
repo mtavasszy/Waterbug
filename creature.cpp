@@ -16,26 +16,26 @@ Creature::Creature(bool init, Vec2f startPos) {
 		do {
 			m_nodes.clear();
 			m_muscles.clear();
-			generateRandom(startPos);
-		} while (hasLooseNodeGroups());
+			GenerateRandom(startPos);
+		} while (HasLooseNodeGroups());
 	}
 
 	// stabilize creature
 	// recenter
 }
 
-void Creature::generateRandom(Vec2f startPos)
+void Creature::GenerateRandom(Vec2f startPos)
 {
 	auto dis_nodes = std::uniform_int_distribution<int>(Config::creature_minNodes, Config::creature_maxNodes);
 	int nNodes = dis_nodes(m_gen);
 
 	// add nodes
 	for (int i = 0; i < nNodes; i++) {
-		addRandomNode(startPos);
+		AddRandomNode(startPos);
 	}
 }
 
-void Creature::addRandomNode(Vec2f startPos)
+void Creature::AddRandomNode(Vec2f startPos)
 {
 	auto dis_pos = std::uniform_real_distribution<float>(0.f, 100.f);
 	auto dis_norm = std::uniform_real_distribution<float>(0.f, 1.f);
@@ -53,7 +53,7 @@ void Creature::addRandomNode(Vec2f startPos)
 	}
 }
 
-bool Creature::isCrossingMuscle(Vec2f p0, Vec2f p1)
+bool Creature::IsCrossingMuscle(Vec2f p0, Vec2f p1)
 {
 	const Vec2f p = p0;
 	const Vec2f r = p1 - p0;
@@ -81,7 +81,7 @@ bool Creature::isCrossingMuscle(Vec2f p0, Vec2f p1)
 	return false;
 }
 
-bool Creature::hasLooseNodeGroups()
+bool Creature::HasLooseNodeGroups()
 {
 	std::queue<Node*> nodesToVisit;
 	std::set<Node*> visitedNodes;
@@ -105,31 +105,31 @@ bool Creature::hasLooseNodeGroups()
 	return visitedNodes.size() != m_nodes.size();
 }
 
-void Creature::update(float dt) {
-	updateMuscles(dt);
-	updateNodes(dt);
+void Creature::Update(float dt) {
+	UpdateMuscles(dt);
+	UpdateNodes(dt);
 }
 
-void Creature::updateMuscles(float dt)
+void Creature::UpdateMuscles(float dt)
 {
 	for (int i = 0; i < m_muscles.size(); i++) {
-		m_muscles[i]->updateClock(dt);
-		m_muscles[i]->updateInternalForces(dt);
+		m_muscles[i]->UpdateClock(dt);
+		m_muscles[i]->UpdateInternalForces(dt);
 	}
 	for (int i = 0; i < m_muscles.size(); i++) {
-		m_muscles[i]->updateExternalForces(dt);
+		m_muscles[i]->UpdateExternalForces(dt);
 	}
 }
 
-void Creature::updateNodes(float dt)
+void Creature::UpdateNodes(float dt)
 {
 	for (int i = 0; i < m_nodes.size(); i++) {
-		m_nodes[i]->updateExternalForces(dt);
-		m_nodes[i]->applyForces(dt);
+		m_nodes[i]->UpdateExternalForces(dt);
+		m_nodes[i]->ApplyForces(dt);
 	}
 }
 
-Vec2f Creature::getCenter()
+Vec2f Creature::GetCenter()
 {
 	Vec2f center = Vec2f(0.f);
 
@@ -140,11 +140,11 @@ Vec2f Creature::getCenter()
 	return center / float(m_nodes.size());
 }
 
-void Creature::draw(sf::RenderWindow& window) {
+void Creature::Draw(sf::RenderWindow& window) {
 	for (int i = 0; i < m_muscles.size(); i++) {
-		m_muscles[i]->draw(window);
+		m_muscles[i]->Draw(window);
 	}
 	for (int i = 0; i < m_nodes.size(); i++) {
-		m_nodes[i]->draw(window);
+		m_nodes[i]->Draw(window);
 	}
 }

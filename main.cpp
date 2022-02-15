@@ -21,7 +21,7 @@ int main()
 		}
 	}
 	for (auto it = creatures.begin(); it != creatures.end(); it++) {
-		it->update(dt);
+		it->Update(dt);
 	}
 	while (window.isOpen())
 	{
@@ -34,8 +34,8 @@ int main()
 
 		window.clear(sf::Color(14, 135, 204, 255));
 		for (auto it = creatures.begin(); it != creatures.end(); it++) {
-			it->update(dt);
-			it->draw(window);
+			it->Update(dt);
+			it->Draw(window);
 		}
 		window.display();
 	}

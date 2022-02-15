@@ -22,7 +22,7 @@ Muscle::Muscle(Node* A, Node* B, float expandLength, float contractLength, float
 		m_edgeVertices[i].color = sf::Color::White;
 }
 
-void Muscle::updateClock(float dt)
+void Muscle::UpdateClock(float dt)
 {
 	m_clock += m_clockSpeed * dt;
 	if (m_clock >= 1) {
@@ -38,7 +38,7 @@ void Muscle::updateClock(float dt)
 	}
 }
 
-void Muscle::updateInternalForces(float dt)
+void Muscle::UpdateInternalForces(float dt)
 {
 	Vec2f d_p = m_nodeB->m_position - m_nodeA->m_position;
 	Vec2f d_v = m_nodeB->m_velocity - m_nodeA->m_velocity;
@@ -54,7 +54,7 @@ void Muscle::updateInternalForces(float dt)
 	m_nodeB->m_internalforce += F_t * -d_p;
 }
 
-void Muscle::updateExternalForces(float dt)
+void Muscle::UpdateExternalForces(float dt)
 {
 	Vec2f normal = Vec2f::getOrthogonal(m_nodeB->m_position - m_nodeA->m_position).normalize();
 
@@ -71,7 +71,7 @@ inline sf::Vector2f toSFVec(Vec2f v) {
 	return sf::Vector2f(v.x, v.y);
 }
 
-void Muscle::draw(sf::RenderWindow& window)
+void Muscle::Draw(sf::RenderWindow& window)
 {
 	Vec2f direction = m_nodeA->m_position - m_nodeB->m_position;
 	Vec2f unitDirection = direction.normalize();

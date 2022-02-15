@@ -19,12 +19,12 @@ Node::Node(Vec2f position) {
 	m_circle.setOutlineThickness(-2.f);
 }
 
-void Node::updateExternalForces(float dt)
+void Node::UpdateExternalForces(float dt)
 {
 	m_externalForce += -0.5f * m_velocity.getLength() * powf(Config::waterDragCoef, dt) * m_velocity;
 }
 
-void Node::applyForces(float dt)
+void Node::ApplyForces(float dt)
 {
 	// euler integration
 	Vec2f force = m_internalforce + m_externalForce;
@@ -40,7 +40,7 @@ inline sf::Vector2f toSFVec(Vec2f v) {
 	return sf::Vector2f(v.x, v.y);
 }
 
-void Node::draw(sf::RenderWindow& window)
+void Node::Draw(sf::RenderWindow& window)
 {
 	m_circle.setPosition(toSFVec(m_position - m_circle.getRadius()));
 	m_circle.setFillColor(m_fillColor);

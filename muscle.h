@@ -6,15 +6,14 @@
 #include <random>
 #include "node.h"
 
-
 class Muscle {
 
 public:
 	Muscle(Node* A, Node* B, float expandLength, float contractLength, float clockStart, float contractTime);
-	void updateClock(float dt);
-	void updateInternalForces(float dt);
-	void updateExternalForces(float dt);
-	void draw(sf::RenderWindow& window);
+	void UpdateClock(float dt);
+	void UpdateInternalForces(float dt);
+	void UpdateExternalForces(float dt);
+	void Draw(sf::RenderWindow& window);
 
 	Node* m_nodeA;
 	Node* m_nodeB;
