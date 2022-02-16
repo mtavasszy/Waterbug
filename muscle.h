@@ -15,6 +15,7 @@ public:
 	void UpdateClock(float dt);
 	void UpdateInternalForces(float dt);
 	void UpdateExternalForces(float dt);
+	void Mutate(std::mt19937& gen);
 	void Draw(sf::RenderWindow& window, Vec2f camPos);
 
 	int m_nodeAIndex, m_nodeBIndex; // used for cloning the object
@@ -32,7 +33,7 @@ public:
 	float m_clock; // runs from 0 to 1
 	float m_clockStart = 0.f;
 	float m_clockSpeed = 0.5f;
-	float m_contractTime = 0.5f;
+	float m_contractTime = 0.5f; //TODO cleanup default values that do nothing
 
 	// drawing information
 	float m_expandThickness = 4.f;

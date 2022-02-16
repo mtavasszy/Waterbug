@@ -96,6 +96,33 @@ void Muscle::UpdateExternalForces(float dt)
 	m_nodeB->m_externalForce += -normal * res_B * muscleExtentionRatio * Config::waterFrictionCoef;
 }
 
+void Muscle::Mutate(std::mt19937& gen)
+{
+	auto mutType_rnd = std::uniform_int_distribution<int>(0, 1);
+	auto mutBit_rnd = std::uniform_int_distribution<int>(1, 8); // assume 8 bit genome
+	float change = (1.f / powf(2.f, float(mutBit_rnd(gen)))) - 0.5f;
+
+	switch (mutType_rnd(gen))
+	{
+	case 0:
+		m_clockStart += change;
+		if (m_clockStart < 0.f)
+			m_clockStart += 1.f;
+		if (m_clockStart > 1.f)
+			m_clockStart -= 1.f;
+		break;
+	case 1:
+		m_contractTime += change;
+		if (m_contractTime < 0.f)
+			m_contractTime += 1.f;
+		if (m_contractTime > 1.f)
+			m_contractTime -= 1.f;
+		break;
+	default:
+		break;
+	}
+}
+
 inline sf::Vector2f toSFVec(Vec2f v) {
 	return sf::Vector2f(v.x, v.y);
 }

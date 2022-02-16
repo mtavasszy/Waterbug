@@ -23,6 +23,9 @@ public:
 	// simulation physics
 	static constexpr float waterDragCoef = 0.2f;
 	static constexpr float waterFrictionCoef = 0.5f;
+
+	// evolution
+	static constexpr float bigMutationChance = 0.05f;
 };
 
 #endif  // CONFIG_H_

@@ -13,7 +13,6 @@ public:
 
 	void Intitialize();
 	void RunGeneration();
-	float RunCreature(int i);
 
 	void Run(sf::RenderWindow& window);
 	void Update();

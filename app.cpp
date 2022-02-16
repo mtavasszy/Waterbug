@@ -23,9 +23,10 @@ void App::Intitialize()
 	m_trailShape.setFillColor(sf::Color::Black);
 }
 
-bool CreatureSortComp(std::unique_ptr<Creature> c0, std::unique_ptr<Creature> c1) {
-	return (c0->m_fitness > c1->m_fitness);
-}
+ bool FitnessSortComp(const std::pair<float, int> f0, const std::pair<float, int> f1)
+	{
+		return (f0.first > f1.first);
+	}
 
 void App::RunGeneration()
 {
@@ -34,45 +35,29 @@ void App::RunGeneration()
 	auto genStart = std::chrono::high_resolution_clock::now();
 
 	for (int i = 0; i < m_creatures.size(); i++) {
-		//auto start = std::chrono::high_resolution_clock::now();
+		Creature copyCreature = Creature(m_creatures[i].get());
 
-		float fitness = RunCreature(i);
+		float fitness = copyCreature.ComputeFitness();
 		m_creatures[i].get()->m_fitness = fitness;
-
-		//auto stop = std::chrono::high_resolution_clock::now();
-		//auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-
-		//std::cout << "Creature finished in " << duration.count() << "ms with a score of " << fitness << "\n";
 	}
 
 	// sort on fitness
-	//std::sort(m_creatures.begin(), m_creatures.end(), CreatureSortComp);
-
-	float highScore = 0;
+	std::vector<std::pair<float, int>> fitness;
+	fitness.reserve(m_creatures.size());
 	for (int i = 0; i < m_creatures.size(); i++) {
-		if (m_creatures[i]->m_fitness > highScore) {
-			highScore = m_creatures[i]->m_fitness;
-			m_bestCreature = m_creatures[i].get();
-		}
+		fitness.push_back(std::pair<float, int >(m_creatures[i].get()->m_fitness, i));
 	}
+
+	std::sort(fitness.begin(), fitness.end(), FitnessSortComp);
+
+	float highScore = fitness[0].first;
+	m_bestCreature = m_creatures[fitness[0].second].get();
 
 	auto genStop = std::chrono::high_resolution_clock::now();
 	auto genDuration = std::chrono::duration_cast<std::chrono::milliseconds>(genStop - genStart);
 
 	std::cout << "Generation finished! Total time: " << genDuration.count() << " ms, max distance of " << highScore << "\n";
 	isRunning = false;
-}
-
-float App::RunCreature(int i)
-{
-	Creature creature = Creature(m_creatures[i].get());
-
-	for (int t = 0; t < Config::runTime * Config::runFPS; t++) {
-		creature.Update(Config::dt);
-		// make sure creature hasnt exploded
-	}
-
-	return creature.GetCenter().getLength();
 }
 
 void App::Run(sf::RenderWindow& window)
@@ -93,7 +78,6 @@ void App::Run(sf::RenderWindow& window)
 		Draw(window);
 		window.display();
 	}
-
 }
 
 void App::Update()

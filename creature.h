@@ -17,14 +17,23 @@ public:
 	void GenerateRandom();
 	void ReCenter();
 	Vec2f GetCenter();
-	void AddRandomNode();
 	bool IsCrossingMuscle(Vec2f p0, Vec2f p1);
 	bool HasLooseNodeGroups();
+	void AddRandomNode();
+	void AddRandomMuscle();
+	void RemoveRandomNode();
+	void RemoveRandomMuscle();
 
 	// simulation
 	void Update(float dt);
 	void UpdateMuscles(float dt);
 	void UpdateNodes(float dt);
+	float ComputeFitness();
+
+	// reproduction
+	Creature createOffspring();
+	void Mutate();
+
 
 	// visualization
 	void Draw(sf::RenderWindow& window, Vec2f camPos);
