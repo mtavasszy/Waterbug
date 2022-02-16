@@ -31,7 +31,7 @@ void App::Intitialize()
 void App::RunGeneration()
 {
 	isRunning = true;
-	std::cout << "Running generation\n";
+
 	auto genStart = std::chrono::high_resolution_clock::now();
 
 	for (int i = 0; i < m_creatures.size(); i++) {
@@ -41,28 +41,63 @@ void App::RunGeneration()
 		m_creatures[i].get()->m_fitness = fitness;
 	}
 
+	auto genStop = std::chrono::high_resolution_clock::now();
+	auto genDuration = std::chrono::duration_cast<std::chrono::milliseconds>(genStop - genStart);
+
+	std::cout << "Generation finished! Total time: " << genDuration.count() << " ms\n";
+
+	isRunning = false;
+}
+
+void App::DoSelection()
+{
+		
+	auto genStart = std::chrono::high_resolution_clock::now();
+	
 	// sort on fitness
-	std::vector<std::pair<float, int>> fitness;
-	fitness.reserve(m_creatures.size());
+	std::vector<std::pair<float, int>> fitnessRanking;
+	fitnessRanking.reserve(m_creatures.size());
 	for (int i = 0; i < m_creatures.size(); i++) {
-		fitness.push_back(std::pair<float, int >(m_creatures[i].get()->m_fitness, i));
+		fitnessRanking.push_back(std::pair<float, int >(m_creatures[i].get()->m_fitness, i));
+	}
+	std::sort(fitnessRanking.begin(), fitnessRanking.end(), FitnessSortComp);
+
+	// let top half reproduce
+	std::vector<std::unique_ptr<Creature>> offspring;
+	offspring.reserve(m_creatures.size());
+
+	for (int i = 0; i < fitnessRanking.size()/2; i++) {
+		int c_i = fitnessRanking[i].second;
+		Creature* c = m_creatures[c_i].get();
+
+		offspring.push_back(std::make_unique<Creature>(c->createOffspring()));
+		offspring.push_back(std::make_unique<Creature>(Creature(c)));
 	}
 
-	std::sort(fitness.begin(), fitness.end(), FitnessSortComp);
+	float highScore = fitnessRanking[0].first;
 
-	float highScore = fitness[0].first;
-	m_bestCreature = m_creatures[fitness[0].second].get();
+	if (m_bestCreature == nullptr || highScore > m_bestCreature->m_fitness)
+		m_bestCreature = std::make_unique<Creature>(Creature(m_creatures[fitnessRanking[0].second].get()));
+
+	std::cout << "Creature " << fitnessRanking[0].second << " got the highest distance of " << highScore << "\n";
+
+	m_creatures.clear();
+	m_creatures = std::move(offspring);
 
 	auto genStop = std::chrono::high_resolution_clock::now();
 	auto genDuration = std::chrono::duration_cast<std::chrono::milliseconds>(genStop - genStart);
 
-	std::cout << "Generation finished! Total time: " << genDuration.count() << " ms, max distance of " << highScore << "\n";
-	isRunning = false;
+	std::cout << "Selection finished! Total time: " << genDuration.count() << " ms\n";
 }
 
 void App::Run(sf::RenderWindow& window)
 {
-	RunGeneration();
+
+	for (int i = 0; i < Config::n_gens; i++) {
+		std::cout << "Running gen " << i << "\n";
+		RunGeneration();
+		DoSelection();
+	}
 
 	while (window.isOpen())
 	{

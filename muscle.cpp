@@ -101,10 +101,12 @@ void Muscle::Mutate(std::mt19937& gen)
 	auto mutType_rnd = std::uniform_int_distribution<int>(0, 1);
 	auto mutBit_rnd = std::uniform_int_distribution<int>(1, 8); // assume 8 bit genome
 	float change = (1.f / powf(2.f, float(mutBit_rnd(gen)))) - 0.5f;
+	//auto mut_rnd = std::uniform_real_distribution<float>(0.f, 1.f);
 
 	switch (mutType_rnd(gen))
 	{
 	case 0:
+		//m_clockStart = mut_rnd(gen);
 		m_clockStart += change;
 		if (m_clockStart < 0.f)
 			m_clockStart += 1.f;
@@ -112,6 +114,7 @@ void Muscle::Mutate(std::mt19937& gen)
 			m_clockStart -= 1.f;
 		break;
 	case 1:
+		//m_contractTime = mut_rnd(gen);
 		m_contractTime += change;
 		if (m_contractTime < 0.f)
 			m_contractTime += 1.f;

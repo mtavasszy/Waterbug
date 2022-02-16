@@ -13,6 +13,7 @@ public:
 
 	void Intitialize();
 	void RunGeneration();
+	void DoSelection();
 
 	void Run(sf::RenderWindow& window);
 	void Update();
@@ -21,7 +22,7 @@ public:
 	std::vector<std::unique_ptr<Creature>> m_creatures;
 	bool isRunning = false;
 
-	Creature* m_bestCreature;
+	std::unique_ptr<Creature> m_bestCreature;
 	std::vector<Vec2f> m_trail;
 	sf::CircleShape m_trailShape;
 };

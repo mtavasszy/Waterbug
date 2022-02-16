@@ -191,6 +191,18 @@ void Creature::RemoveRandomNode()
 
 		// remove node
 		m_nodes.erase(m_nodes.begin() + n_i);
+
+		// fix muscle node pointers
+		for (int i = 0; i < m_muscles.size(); i++) {
+			if (m_muscles[i]->m_nodeAIndex >= n_i) {
+				m_muscles[i]->m_nodeAIndex--;
+				m_muscles[i]->m_nodeA = m_nodes[m_muscles[i]->m_nodeAIndex].get();
+			}
+			if (m_muscles[i]->m_nodeBIndex >= n_i) {
+				m_muscles[i]->m_nodeBIndex--;
+				m_muscles[i]->m_nodeB = m_nodes[m_muscles[i]->m_nodeBIndex].get();
+			}
+		}
 	}
 }
 
@@ -228,21 +240,49 @@ void Creature::UpdateNodes(float dt)
 
 float Creature::ComputeFitness()
 {
+	if (m_fitness > 0.f)
+		return m_fitness;
+
 	if (HasLooseNodeGroups()) {
 		return -1.f;
 	}
 
 	for (int t = 0; t < Config::runTime * Config::runFPS; t++) {
 		Update(Config::dt);
-		// make sure creature hasnt exploded
+
+		if (IsExploded())
+			return -1.f;
 	}
 
-	return GetCenter().getLength();
+	m_fitness = GetCenter().getLength();
+
+	return m_fitness;
+}
+
+bool Creature::IsExploded()
+{
+	float maxSpeed = Config::creature_maxEdgeLength * 2;
+	float maxSpeedSqr = maxSpeed * maxSpeed;
+
+	for (int i = 0; i < m_nodes.size(); i++) {
+		if (m_nodes[i]->m_velocity.getSquaredLength() > maxSpeedSqr)
+			return true;
+	}
+	for (int i = 0; i < m_muscles.size(); i++) {
+		if (Vec2f::squaredDistance(m_muscles[i]->m_nodeA->m_position, m_muscles[i]->m_nodeB->m_position) > maxSpeedSqr)
+			return true;
+	}
+
+	return false;
 }
 
 Creature Creature::createOffspring()
 {
 	Creature c = Creature(this);
+
+	std::random_device rd;
+	c.m_gen = std::mt19937(rd());
+
 	c.Mutate();
 	return c;
 }
@@ -250,7 +290,7 @@ Creature Creature::createOffspring()
 void Creature::Mutate()
 {
 	// small mutation
-	auto muscle_rnd = std::uniform_int_distribution<int>(0, int(m_muscles.size())-1);
+	auto muscle_rnd = std::uniform_int_distribution<int>(0, int(m_muscles.size()) - 1);
 	int muscle_i = muscle_rnd(m_gen);
 	m_muscles[muscle_i]->Mutate(m_gen);
 

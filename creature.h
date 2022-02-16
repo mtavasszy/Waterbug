@@ -29,6 +29,7 @@ public:
 	void UpdateMuscles(float dt);
 	void UpdateNodes(float dt);
 	float ComputeFitness();
+	bool IsExploded();
 
 	// reproduction
 	Creature createOffspring();
