@@ -15,6 +15,7 @@ public:
 
 	// structure
 	void GenerateRandom();
+	void SettleStructure();
 	void ReCenter();
 	Vec2f GetCenter();
 	bool IsCrossingMuscle(Vec2f p0, Vec2f p1);

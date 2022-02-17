@@ -22,7 +22,7 @@ Creature::Creature(bool init) {
 	}
 
 	// stabilize creature
-	ReCenter();
+	SettleStructure();
 }
 
 Creature::Creature(const Creature* c)
@@ -37,6 +37,8 @@ Creature::Creature(const Creature* c)
 		m_muscles[i]->m_nodeA = m_nodes[m_muscles[i]->m_nodeAIndex].get();
 		m_muscles[i]->m_nodeB = m_nodes[m_muscles[i]->m_nodeBIndex].get();
 	}
+
+	m_fitness = 0.f;
 }
 
 void Creature::GenerateRandom()
@@ -48,6 +50,14 @@ void Creature::GenerateRandom()
 	for (int i = 0; i < nNodes; i++) {
 		AddRandomNode();
 	}
+}
+
+void Creature::SettleStructure()
+{
+	for (int i = 0; i < Config::creature_settleIterations; i++) {
+		Update(Config::dt);
+	}
+	ReCenter();
 }
 
 void Creature::ReCenter()
@@ -213,7 +223,6 @@ void Creature::RemoveRandomMuscle()
 	m_muscles.erase(m_muscles.begin() + m_i);
 }
 
-
 void Creature::Update(float dt) {
 	UpdateMuscles(dt);
 	UpdateNodes(dt);
@@ -243,16 +252,16 @@ float Creature::ComputeFitness()
 	if (m_fitness > 0.f)
 		return m_fitness;
 
-	if (HasLooseNodeGroups()) {
+	if (IsExploded()) {
 		return -1.f;
 	}
 
 	for (int t = 0; t < Config::runTime * Config::runFPS; t++) {
 		Update(Config::dt);
-
-		if (IsExploded())
-			return -1.f;
 	}
+
+	if (IsExploded())
+		return -1.f;
 
 	m_fitness = GetCenter().getLength();
 
@@ -279,11 +288,11 @@ bool Creature::IsExploded()
 Creature Creature::createOffspring()
 {
 	Creature c = Creature(this);
-
 	std::random_device rd;
 	c.m_gen = std::mt19937(rd());
-
 	c.Mutate();
+
+	c.SettleStructure();
 	return c;
 }
 

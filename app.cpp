@@ -23,10 +23,10 @@ void App::Intitialize()
 	m_trailShape.setFillColor(sf::Color::Black);
 }
 
- bool FitnessSortComp(const std::pair<float, int> f0, const std::pair<float, int> f1)
-	{
-		return (f0.first > f1.first);
-	}
+bool FitnessSortComp(const std::pair<float, int> f0, const std::pair<float, int> f1)
+{
+	return (f0.first > f1.first);
+}
 
 void App::RunGeneration()
 {
@@ -34,6 +34,7 @@ void App::RunGeneration()
 
 	auto genStart = std::chrono::high_resolution_clock::now();
 
+#pragma omp parallel for
 	for (int i = 0; i < m_creatures.size(); i++) {
 		Creature copyCreature = Creature(m_creatures[i].get());
 
@@ -49,11 +50,10 @@ void App::RunGeneration()
 	isRunning = false;
 }
 
-void App::DoSelection()
+void App::CreateOffspring()
 {
-		
 	auto genStart = std::chrono::high_resolution_clock::now();
-	
+
 	// sort on fitness
 	std::vector<std::pair<float, int>> fitnessRanking;
 	fitnessRanking.reserve(m_creatures.size());
@@ -63,15 +63,15 @@ void App::DoSelection()
 	std::sort(fitnessRanking.begin(), fitnessRanking.end(), FitnessSortComp);
 
 	// let top half reproduce
-	std::vector<std::unique_ptr<Creature>> offspring;
-	offspring.reserve(m_creatures.size());
+	std::vector<std::unique_ptr<Creature>> offspring(m_creatures.size());
 
-	for (int i = 0; i < fitnessRanking.size()/2; i++) {
+#pragma omp parallel for
+	for (int i = 0; i < fitnessRanking.size() / 2; i++) {
 		int c_i = fitnessRanking[i].second;
 		Creature* c = m_creatures[c_i].get();
 
-		offspring.push_back(std::make_unique<Creature>(c->createOffspring()));
-		offspring.push_back(std::make_unique<Creature>(Creature(c)));
+		offspring[i * 2] = std::make_unique<Creature>(c->createOffspring());
+		offspring[i * 2 + 1] = std::make_unique<Creature>(c->createOffspring());
 	}
 
 	float highScore = fitnessRanking[0].first;
@@ -90,14 +90,18 @@ void App::DoSelection()
 	std::cout << "Selection finished! Total time: " << genDuration.count() << " ms\n";
 }
 
-void App::Run(sf::RenderWindow& window)
+void App::RunMultipleGenerations()
 {
-
 	for (int i = 0; i < Config::n_gens; i++) {
 		std::cout << "Running gen " << i << "\n";
 		RunGeneration();
-		DoSelection();
+		CreateOffspring();
 	}
+}
+
+void App::Run(sf::RenderWindow& window)
+{
+	RunMultipleGenerations();
 
 	while (window.isOpen())
 	{

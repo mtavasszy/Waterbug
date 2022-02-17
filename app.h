@@ -13,7 +13,8 @@ public:
 
 	void Intitialize();
 	void RunGeneration();
-	void DoSelection();
+	void CreateOffspring();
+	void RunMultipleGenerations();
 
 	void Run(sf::RenderWindow& window);
 	void Update();
