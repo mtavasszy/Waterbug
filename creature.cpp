@@ -184,7 +184,7 @@ void Creature::AddRandomMuscle()
 
 void Creature::RemoveRandomNode()
 {
-	if (m_nodes.size() > Config::creature_minNodes) {
+	if (m_nodes.size() > Config::creature_minNodes && m_muscles.size() >= m_nodes.size()) {
 		auto node_rnd = std::uniform_int_distribution<int>(0, int(m_nodes.size()) - 1);
 		int n_i = node_rnd(m_gen);
 
@@ -214,9 +214,11 @@ void Creature::RemoveRandomNode()
 
 void Creature::RemoveRandomMuscle()
 {
-	auto muscle_rnd = std::uniform_int_distribution<int>(0, int(m_muscles.size()) - 1);
-	int m_i = muscle_rnd(m_gen);
-	m_muscles.erase(m_muscles.begin() + m_i);
+	if (m_muscles.size() > m_nodes.size()) {
+		auto muscle_rnd = std::uniform_int_distribution<int>(0, int(m_muscles.size()) - 1);
+		int m_i = muscle_rnd(m_gen);
+		m_muscles.erase(m_muscles.begin() + m_i);
+	}
 }
 
 void Creature::Update(float dt) {
@@ -238,7 +240,6 @@ void Creature::UpdateMuscles(float dt)
 void Creature::UpdateNodes(float dt)
 {
 	for (int i = 0; i < m_nodes.size(); i++) {
-		m_nodes[i]->UpdateExternalForces(dt);
 		m_nodes[i]->ApplyForces(dt);
 	}
 }
@@ -248,7 +249,7 @@ float Creature::ComputeFitness()
 	if (m_fitness > 0.f)
 		return m_fitness;
 
-	if (IsExploded()) {
+	if (HasLooseNodeGroups() || IsExploded()) {
 		return -1.f;
 	}
 

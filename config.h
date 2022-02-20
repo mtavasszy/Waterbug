@@ -10,7 +10,7 @@ public:
 	static constexpr int screen_h = 720;
 	static constexpr int n_creatures = 1000;
 	static constexpr int n_gens = 500;
-	static constexpr int runTime = 30; // seconds
+	static constexpr int runTime = 15; // seconds
 	static constexpr int runFPS = 60;
 	static constexpr float dt = 1.f / float(runFPS);
 
@@ -24,7 +24,7 @@ public:
 
 
 	// simulation physics
-	static constexpr float waterDragCoef = 0.4f;
+	static constexpr float waterDragCoef = 0.1f;
 	static constexpr float waterFrictionCoef = 0.5f;
 
 	// evolution

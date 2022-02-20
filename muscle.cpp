@@ -104,7 +104,19 @@ void Muscle::UpdateInternalForces(float dt)
 void Muscle::UpdateExternalForces(float dt)
 {
 	Vec2f normal = Vec2f::getOrthogonal(m_nodeB->m_position - m_nodeA->m_position).normalize();
+	
+	// drag
+	float angleCoeff_A = Vec2f::dot(normal, m_nodeA->m_velocity);
+	if (angleCoeff_A < 0)
+		angleCoeff_A = -angleCoeff_A;
+	m_nodeA->m_externalForce += -0.5f * angleCoeff_A * powf(Config::waterDragCoef, dt) * m_nodeA->m_velocity;
 
+	float angleCoeff_B = Vec2f::dot(normal, m_nodeB->m_velocity);
+	if (angleCoeff_B < 0)
+		angleCoeff_B = -angleCoeff_B;
+	m_nodeB->m_externalForce += -0.5f * angleCoeff_B * powf(Config::waterDragCoef, dt) * m_nodeB->m_velocity;
+
+	// action = opposite reaction
 	float muscleExtentionRatio = Vec2f::distance(m_nodeA->m_position, m_nodeB->m_position) / Config::creature_maxEdgeLength;
 
 	float res_A = Vec2f::dot(normal, m_nodeA->m_internalforce);

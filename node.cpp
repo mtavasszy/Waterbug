@@ -34,11 +34,6 @@ Node::Node(const Node* n)
 	m_fillColor = n->m_fillColor;
 }
 
-void Node::UpdateExternalForces(float dt)
-{
-	m_externalForce += -0.5f * m_velocity.getLength() * powf(Config::waterDragCoef, dt) * m_velocity;
-}
-
 void Node::ApplyForces(float dt)
 {
 	// euler integration
