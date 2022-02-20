@@ -2,16 +2,20 @@
 #include "node.h"
 #include "Vec2.h"
 #include "config.h"
+#include "creature.h"
+#include "utils.h"
 
-Muscle::Muscle(int A_i, int B_i, Node* A, Node* B, float expandLength, float contractLength, float clockStart, float contractTime)
+Muscle::Muscle(Creature * parent, int A_i, int B_i, float clockStart, float contractTime)
 {
 	// connected nodes
-	m_nodeAIndex = A_i;
-	m_nodeBIndex = B_i;
-	m_nodeA = A;
-	m_nodeB = B;
-	m_expandLength = expandLength;
-	m_contractLength = contractLength;
+	m_parent = parent;
+	m_Ai= A_i;
+	m_Bi = B_i;
+	m_nodeA = parent->m_nodes[A_i].get();
+	m_nodeB = parent->m_nodes[B_i].get();
+
+	m_expandLength = Config::creature_maxEdgeLength;
+	m_contractLength = Config::creature_minEdgeLength;
 
 	// clock
 	m_clockStart = clockStart;
@@ -26,8 +30,10 @@ Muscle::Muscle(int A_i, int B_i, Node* A, Node* B, float expandLength, float con
 
 Muscle::Muscle(const Muscle* m)
 {
-	m_nodeAIndex = m->m_nodeAIndex;
-	m_nodeBIndex = m->m_nodeBIndex;
+	// connected nodes
+	m_parent = m->m_parent;
+	m_Ai = m->m_Ai;
+	m_Bi = m->m_Bi;
 
 	// spring model info
 	m_expandLength = m->m_expandLength;
@@ -49,6 +55,18 @@ Muscle::Muscle(const Muscle* m)
 	for (int i = 0; i < 4; i++) {
 		m_edgeVertices[i] = m->m_edgeVertices[i];
 	}
+}
+
+void Muscle::SetParent(Creature* parent)
+{
+	m_parent = parent;
+	ResetNodePointers();
+}
+
+void Muscle::ResetNodePointers()
+{
+	m_nodeA = m_parent->m_nodes[m_Ai].get();
+	m_nodeB = m_parent->m_nodes[m_Bi].get();
 }
 
 void Muscle::UpdateClock(float dt)
@@ -124,10 +142,6 @@ void Muscle::Mutate(std::mt19937& gen)
 	default:
 		break;
 	}
-}
-
-inline sf::Vector2f toSFVec(Vec2f v) {
-	return sf::Vector2f(v.x, v.y);
 }
 
 void Muscle::Draw(sf::RenderWindow& window, Vec2f camPos)

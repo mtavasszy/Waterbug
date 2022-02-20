@@ -1,4 +1,3 @@
-#pragma once
 #ifndef MUSCLE_H_ 
 #define MUSCLE_H_
 
@@ -6,19 +5,24 @@
 #include <random>
 #include "node.h"
 
+class Creature;
+
 class Muscle {
 
 public:
-	Muscle(int A_i, int B_i, Node* A, Node* B, float expandLength, float contractLength, float clockStart, float contractTime);
+	Muscle(Creature * parent, int A_i, int B_i, float clockStart, float contractTime);
 	Muscle(const Muscle* m);
 
+	void SetParent(Creature* parent);
+	void ResetNodePointers();
 	void UpdateClock(float dt);
 	void UpdateInternalForces(float dt);
 	void UpdateExternalForces(float dt);
 	void Mutate(std::mt19937& gen);
 	void Draw(sf::RenderWindow& window, Vec2f camPos);
 
-	int m_nodeAIndex, m_nodeBIndex; // used for cloning the object
+	Creature* m_parent;
+	int m_Ai, m_Bi;
 	Node* m_nodeA;
 	Node* m_nodeB;
 

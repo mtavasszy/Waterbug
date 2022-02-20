@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "Vec2.h"
 #include "config.h"
-
+#include "utils.h"
 
 Node::Node(Vec2f position) {
 	// physics
@@ -49,10 +49,6 @@ void Node::ApplyForces(float dt)
 	// reset forces
 	m_internalforce = Vec2f(0.f);
 	m_externalForce = Vec2f(0.f);
-}
-
-inline sf::Vector2f toSFVec(Vec2f v) {
-	return sf::Vector2f(v.x, v.y);
 }
 
 void Node::Draw(sf::RenderWindow& window, Vec2f camPos)

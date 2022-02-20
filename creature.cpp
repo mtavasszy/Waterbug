@@ -34,8 +34,7 @@ Creature::Creature(const Creature* c)
 	}
 	for (int i = 0; i < c->m_muscles.size(); i++) {
 		m_muscles.push_back(std::make_unique<Muscle>(Muscle(c->m_muscles[i].get())));
-		m_muscles[i]->m_nodeA = m_nodes[m_muscles[i]->m_nodeAIndex].get();
-		m_muscles[i]->m_nodeB = m_nodes[m_muscles[i]->m_nodeBIndex].get();
+		m_muscles[i]->SetParent(this);
 	}
 
 	m_fitness = 0.f;
@@ -65,6 +64,8 @@ void Creature::ReCenter()
 	Vec2f center = GetCenter();
 	for (int i = 0; i < m_nodes.size(); i++) {
 		m_nodes[i]->m_position -= center;
+		m_nodes[i]->m_velocity = Vec2f(0.f);
+
 	}
 }
 
@@ -144,10 +145,8 @@ void Creature::AddRandomNode()
 			if (dis_norm(m_gen) < Config::creature_edgeConnectChance/* && !isCrossingMuscle(pos, m_nodes[i]->m_position)*/) {
 				int n0_i = int(m_nodes.size()) - 1;
 				int n1_i = i;
-				Node* n0 = m_nodes.back().get();
-				Node* n1 = m_nodes[i].get();
 
-				m_muscles.push_back(std::make_unique<Muscle>(Muscle(n0_i, n1_i, n0, n1, Config::creature_maxEdgeLength, Config::creature_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
+				m_muscles.push_back(std::make_unique<Muscle>(Muscle(this, n0_i, n1_i, dis_norm(m_gen), dis_norm(m_gen))));
 			}
 		}
 	}
@@ -172,16 +171,14 @@ void Creature::AddRandomMuscle()
 
 			muscleExists = false;
 			for (int i = 0; i < m_muscles.size(); i++) {
-				if ((m_muscles[i]->m_nodeAIndex == n0_i && m_muscles[i]->m_nodeBIndex == n1_i) || (m_muscles[i]->m_nodeAIndex == n1_i && m_muscles[i]->m_nodeBIndex == n0_i)) {
+				if ((m_muscles[i]->m_Ai == n0_i && m_muscles[i]->m_Bi == n1_i) || (m_muscles[i]->m_Ai == n1_i && m_muscles[i]->m_Bi == n0_i)) {
 					muscleExists = true;
 					break;
 				}
 			}
 		} while (muscleExists);
 
-		Node* n0 = m_nodes[n0_i].get();
-		Node* n1 = m_nodes[n1_i].get();
-		m_muscles.push_back(std::make_unique<Muscle>(Muscle(n0_i, n1_i, n0, n1, Config::creature_maxEdgeLength, Config::creature_minEdgeLength, dis_norm(m_gen), dis_norm(m_gen))));
+		m_muscles.push_back(std::make_unique<Muscle>(Muscle(this, n0_i, n1_i, dis_norm(m_gen), dis_norm(m_gen))));
 	}
 }
 
@@ -193,7 +190,7 @@ void Creature::RemoveRandomNode()
 
 		// remove connecting muscles
 		for (int i = 0; i < m_muscles.size(); i++) {
-			if (m_muscles[i]->m_nodeAIndex == n_i || m_muscles[i]->m_nodeBIndex == n_i) {
+			if (m_muscles[i]->m_Ai == n_i || m_muscles[i]->m_Bi == n_i) {
 				m_muscles.erase(m_muscles.begin() + i);
 				i--;
 			}
@@ -204,14 +201,13 @@ void Creature::RemoveRandomNode()
 
 		// fix muscle node pointers
 		for (int i = 0; i < m_muscles.size(); i++) {
-			if (m_muscles[i]->m_nodeAIndex >= n_i) {
-				m_muscles[i]->m_nodeAIndex--;
-				m_muscles[i]->m_nodeA = m_nodes[m_muscles[i]->m_nodeAIndex].get();
+			if (m_muscles[i]->m_Ai >= n_i) {
+				m_muscles[i]->m_Ai--;
 			}
-			if (m_muscles[i]->m_nodeBIndex >= n_i) {
-				m_muscles[i]->m_nodeBIndex--;
-				m_muscles[i]->m_nodeB = m_nodes[m_muscles[i]->m_nodeBIndex].get();
+			if (m_muscles[i]->m_Bi >= n_i) {
+				m_muscles[i]->m_Bi--;
 			}
+			m_muscles[i]->ResetNodePointers();
 		}
 	}
 }

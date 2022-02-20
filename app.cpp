@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <chrono>
+#include "utils.h"
 
 App::App()
 {
@@ -130,10 +131,6 @@ void App::Update()
 	if (Vec2f::squaredDistance(m_trail.back(), center) > 400.f) {
 		m_trail.push_back(center);
 	}
-}
-
-inline sf::Vector2f toSFVec(Vec2f v) {
-	return sf::Vector2f(v.x, v.y);
 }
 
 void App::Draw(sf::RenderWindow& window)
