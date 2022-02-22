@@ -4,6 +4,7 @@
 #include "Vec2.h"
 #include <queue>
 #include <set>
+#include "utils.h"
 
 Creature::Creature(bool init) {
 
@@ -34,7 +35,7 @@ Creature::Creature(const Creature* c)
 	}
 	for (int i = 0; i < c->m_muscles.size(); i++) {
 		m_muscles.push_back(std::make_unique<Muscle>(Muscle(c->m_muscles[i].get())));
-		m_muscles[i]->SetParent(this);
+		m_muscles[i]->ResetNodePointers(this);
 	}
 
 	m_fitness = 0.f;
@@ -95,9 +96,8 @@ bool Creature::IsCrossingMuscle(Vec2f p0, Vec2f p1)
 		const Vec2f q = m0;
 		const Vec2f s = m1 - m0;
 
-		float t, u;
-		t = (-r.y * (p.x - q.x) + r.x * (p.y - q.y)) / (-s.x * r.y + r.x * s.y);
-		u = (s.x * (p.y - q.y) - s.y * (p.x - q.x)) / (-s.x * r.y + r.x * s.y);
+		const float t = (-r.y * (p.x - q.x) + r.x * (p.y - q.y)) / (-s.x * r.y + r.x * s.y);
+		const float u = (s.x * (p.y - q.y) - s.y * (p.x - q.x)) / (-s.x * r.y + r.x * s.y);
 
 		if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
 		{
@@ -207,7 +207,7 @@ void Creature::RemoveRandomNode()
 			if (m_muscles[i]->m_Bi >= n_i) {
 				m_muscles[i]->m_Bi--;
 			}
-			m_muscles[i]->ResetNodePointers();
+			m_muscles[i]->ResetNodePointers(this);
 		}
 	}
 }

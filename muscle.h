@@ -13,20 +13,19 @@ public:
 	Muscle(Creature * parent, int A_i, int B_i, float clockStart, float contractTime);
 	Muscle(const Muscle* m);
 
-	void SetParent(Creature* parent);
-	void ResetNodePointers();
+	void ResetNodePointers(Creature* parent);
 	void UpdateClock(float dt);
 	void UpdateInternalForces(float dt);
 	void UpdateExternalForces(float dt);
 	void Mutate(std::mt19937& gen);
 	void Draw(sf::RenderWindow& window, Vec2f camPos);
 
-	Creature* m_parent;
+	// nodes
 	int m_Ai, m_Bi;
 	Node* m_nodeA;
 	Node* m_nodeB;
 
-	// spring model info
+	// spring model
 	float m_expandLength = 100.f;
 	float m_contractLength = 40.f;
 	float m_restLength;

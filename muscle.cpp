@@ -5,14 +5,12 @@
 #include "creature.h"
 #include "utils.h"
 
-Muscle::Muscle(Creature * parent, int A_i, int B_i, float clockStart, float contractTime)
+Muscle::Muscle(Creature* parent, int A_i, int B_i, float clockStart, float contractTime)
 {
 	// connected nodes
-	m_parent = parent;
-	m_Ai= A_i;
+	m_Ai = A_i;
 	m_Bi = B_i;
-	m_nodeA = parent->m_nodes[A_i].get();
-	m_nodeB = parent->m_nodes[B_i].get();
+	ResetNodePointers(parent);
 
 	m_expandLength = Config::creature_maxEdgeLength;
 	m_contractLength = Config::creature_minEdgeLength;
@@ -31,7 +29,6 @@ Muscle::Muscle(Creature * parent, int A_i, int B_i, float clockStart, float cont
 Muscle::Muscle(const Muscle* m)
 {
 	// connected nodes
-	m_parent = m->m_parent;
 	m_Ai = m->m_Ai;
 	m_Bi = m->m_Bi;
 
@@ -57,16 +54,10 @@ Muscle::Muscle(const Muscle* m)
 	}
 }
 
-void Muscle::SetParent(Creature* parent)
+void Muscle::ResetNodePointers(Creature* parent)
 {
-	m_parent = parent;
-	ResetNodePointers();
-}
-
-void Muscle::ResetNodePointers()
-{
-	m_nodeA = m_parent->m_nodes[m_Ai].get();
-	m_nodeB = m_parent->m_nodes[m_Bi].get();
+	m_nodeA = parent->m_nodes[m_Ai].get();
+	m_nodeB = parent->m_nodes[m_Bi].get();
 }
 
 void Muscle::UpdateClock(float dt)
