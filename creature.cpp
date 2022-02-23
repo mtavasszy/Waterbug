@@ -121,11 +121,30 @@ bool Creature::HasLooseNodeGroups()
 
 bool Creature::HasCrossingMuscles()
 {
+	for (int i = 0; i < m_muscles.size(); i++) {
+		if (IsCrossingMuscle(m_muscles[i]->m_Ai, m_muscles[i]->m_Bi))
+			return true;
+	}
+
 	return false;
 }
 
-bool Creature::IsCrossingMuscle()
+bool Creature::IsCrossingMuscle(int A_i, int B_i)
 {
+	const Vec2f p1 = m_nodes[A_i]->m_position;
+	const Vec2f q1 = m_nodes[B_i]->m_position;
+
+	for (int i = 0; i < m_muscles.size(); i++) {
+		Muscle* m = m_muscles[i].get();
+		if (!m->ContainsNode(A_i) && !m->ContainsNode(B_i)) {
+			const Vec2f p2 = m->m_nodeA->m_position;
+			const Vec2f q2 = m->m_nodeB->m_position;
+
+			if (Vec2f::isIntersect(p1, q1, p2, q2))
+				return true;
+		}
+	}
+
 	return false;
 }
 

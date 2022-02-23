@@ -8,6 +8,4 @@ inline sf::Vector2f toSFVec(const Vec2f v) {
 	return sf::Vector2f(v.x, v.y);
 }
 
-
-
 #endif  // UTILS_H_

@@ -33,8 +33,8 @@ Muscle::Muscle(const Muscle* m)
 	m_Bi = m->m_Bi;
 
 	// spring model info
-	m_expandLength = m->m_expandLength;
-	m_contractLength = m->m_contractLength;
+	m_expandLength = Config::creature_maxEdgeLength;
+	m_contractLength = Config::creature_minEdgeLength;
 	m_restLength = m->m_restLength;
 	m_stiffness = m->m_stiffness;
 	m_damping = m->m_damping;
@@ -80,6 +80,21 @@ void Muscle::SetNormal()
 {
 	const Vec2f AtoB = m_nodeB->m_position - m_nodeA->m_position;
 	m_normal = Vec2f::getOrthogonal(AtoB).normalize();
+}
+
+bool Muscle::ContainsNode(int n)
+{
+	return m_Ai == n || m_Bi == n;
+}
+
+int Muscle::GetOther(int nodeId)
+{
+	if (nodeId == m_Ai)
+		return m_Bi;
+	else if (nodeId == m_Bi)
+		return m_Ai;
+
+	return -1;
 }
 
 void Muscle::UpdateInternalForces(float dt)

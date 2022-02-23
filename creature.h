@@ -21,7 +21,7 @@ public:
 	void CheckIfValidCreature();
 	bool HasLooseNodeGroups();
 	bool HasCrossingMuscles();
-	bool IsCrossingMuscle();
+	bool IsCrossingMuscle(int A, int B);
 	void AddRandomNode();
 	void AddRandomMuscle();
 	void RemoveRandomNode();

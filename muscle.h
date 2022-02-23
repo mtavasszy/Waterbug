@@ -16,6 +16,8 @@ public:
 	void ResetNodePointers(Creature* parent);
 	void UpdateClock(float dt);
 	void SetNormal();
+	bool ContainsNode(int n);
+	int GetOther(int nodeId);
 	void UpdateInternalForces(float dt);
 	void UpdateExternalForces(float dt);
 	void Mutate(std::mt19937& gen);
