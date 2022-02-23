@@ -16,12 +16,11 @@ Creature::Creature(bool init) {
 	// init creature
 	if (init) {
 		do {
-			m_nodes.clear();
-			m_muscles.clear();
 			GenerateRandom();
-		} while (HasLooseNodeGroups());
 
-		SettleStructure();
+			CheckIfValidCreature();
+			TrySettleStructure();
+		} while (!m_isValid || !m_isSettled);
 	}
 }
 
@@ -37,11 +36,17 @@ Creature::Creature(const Creature* c)
 		m_muscles[i]->ResetNodePointers(this);
 	}
 
+	m_isValid = c->m_isValid;
+	m_isSettled = c->m_isSettled;
+
 	m_fitness = 0.f;
 }
 
 void Creature::GenerateRandom()
 {
+	m_nodes.clear();
+	m_muscles.clear();
+
 	auto dis_nodes = std::uniform_int_distribution<int>(Config::creature_minNodes, Config::creature_maxNodes);
 	int nNodes = dis_nodes(m_gen);
 
@@ -51,12 +56,19 @@ void Creature::GenerateRandom()
 	}
 }
 
-void Creature::SettleStructure()
+void Creature::TrySettleStructure()
 {
 	for (int i = 0; i < Config::creature_settleIterations; i++) {
 		Update(Config::dt);
 	}
+
+	if (IsExploded()) {
+		m_isSettled = false;
+		return;
+	}
+
 	ReCenter();
+	m_isSettled = true;
 }
 
 void Creature::ReCenter()
@@ -65,7 +77,6 @@ void Creature::ReCenter()
 	for (int i = 0; i < m_nodes.size(); i++) {
 		m_nodes[i]->m_position -= center;
 		m_nodes[i]->m_velocity = Vec2f(0.f);
-
 	}
 }
 
@@ -78,6 +89,11 @@ Vec2f Creature::GetCenter()
 	}
 
 	return center / float(m_nodes.size());
+}
+
+void Creature::CheckIfValidCreature()
+{
+	m_isValid = !HasLooseNodeGroups() && !HasCrossingMuscles();
 }
 
 bool Creature::HasLooseNodeGroups()
@@ -101,6 +117,16 @@ bool Creature::HasLooseNodeGroups()
 		}
 	}
 	return visitedNodes.size() != m_nodes.size();
+}
+
+bool Creature::HasCrossingMuscles()
+{
+	return false;
+}
+
+bool Creature::IsCrossingMuscle()
+{
+	return false;
 }
 
 void Creature::AddRandomNode()
@@ -248,7 +274,7 @@ void Creature::SetHull()
 
 void Creature::UpdateMuscles(float dt)
 {
-	SetHull();
+	//SetHull();
 	for (int i = 0; i < m_muscles.size(); i++) {
 		m_muscles[i]->UpdateClock(dt);
 		m_muscles[i]->SetNormal();
@@ -268,28 +294,23 @@ void Creature::UpdateNodes(float dt)
 
 float Creature::ComputeFitness()
 {
-	if (m_fitness > 0.f)
-		return m_fitness;
-
-	if (HasLooseNodeGroups() || IsExploded()) {
+	if (!m_isValid || !m_isSettled)
 		return -1.f;
-	}
 
-	for (int t = 0; t < Config::runTime * Config::runFPS; t++) {
+	const int nSteps = Config::runTime * Config::runFPS;
+	for (int t = 0; t < nSteps; t++) {
 		Update(Config::dt);
 	}
 
 	if (IsExploded())
 		return -1.f;
 
-	m_fitness = GetCenter().getLength();
-
-	return m_fitness;
+	return GetCenter().getLength();
 }
 
 bool Creature::IsExploded()
 {
-	float maxSpeed = Config::creature_maxEdgeLength * 2;
+	float maxSpeed = Config::creature_maxEdgeLength * 5;
 	float maxSpeedSqr = maxSpeed * maxSpeed;
 
 	for (int i = 0; i < m_nodes.size(); i++) {
@@ -311,7 +332,10 @@ Creature Creature::createOffspring()
 	c.m_gen = std::mt19937(rd());
 	c.Mutate();
 
-	c.SettleStructure();
+	// validate creature
+	c.CheckIfValidCreature();
+	c.TrySettleStructure();
+
 	return c;
 }
 

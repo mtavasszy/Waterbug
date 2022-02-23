@@ -15,10 +15,13 @@ public:
 
 	// structure
 	void GenerateRandom();
-	void SettleStructure();
+	void TrySettleStructure();
 	void ReCenter();
 	Vec2f GetCenter();
+	void CheckIfValidCreature();
 	bool HasLooseNodeGroups();
+	bool HasCrossingMuscles();
+	bool IsCrossingMuscle();
 	void AddRandomNode();
 	void AddRandomMuscle();
 	void RemoveRandomNode();
@@ -37,13 +40,15 @@ public:
 	Creature createOffspring();
 	void Mutate();
 
-
 	// visualization
 	void Draw(sf::RenderWindow& window, Vec2f camPos);
 
 	// attributes
 	std::vector<std::unique_ptr<Node>> m_nodes;
 	std::vector< std::unique_ptr<Muscle>> m_muscles;
+
+	bool m_isValid = false;
+	bool m_isSettled = false;
 	float m_fitness;
 
 	// random
