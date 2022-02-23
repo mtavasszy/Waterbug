@@ -18,7 +18,6 @@ public:
 	void SettleStructure();
 	void ReCenter();
 	Vec2f GetCenter();
-	bool IsCrossingMuscle(Vec2f p0, Vec2f p1);
 	bool HasLooseNodeGroups();
 	void AddRandomNode();
 	void AddRandomMuscle();
@@ -27,6 +26,8 @@ public:
 
 	// simulation
 	void Update(float dt);
+	int GetMuscle(int A, int B);
+	void SetHull();
 	void UpdateMuscles(float dt);
 	void UpdateNodes(float dt);
 	float ComputeFitness();

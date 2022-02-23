@@ -20,10 +20,9 @@ Creature::Creature(bool init) {
 			m_muscles.clear();
 			GenerateRandom();
 		} while (HasLooseNodeGroups());
-	}
 
-	// stabilize creature
-	SettleStructure();
+		SettleStructure();
+	}
 }
 
 Creature::Creature(const Creature* c)
@@ -79,33 +78,6 @@ Vec2f Creature::GetCenter()
 	}
 
 	return center / float(m_nodes.size());
-}
-
-bool Creature::IsCrossingMuscle(Vec2f p0, Vec2f p1)
-{
-	const Vec2f p = p0;
-	const Vec2f r = p1 - p0;
-
-	for (int i = 0; i < m_muscles.size(); i++) {
-		const Vec2f m0 = m_muscles[i]->m_nodeA->m_position;
-		const Vec2f m1 = m_muscles[i]->m_nodeB->m_position;
-
-		if (p0 == m0 || p0 == m1 || p1 == m0 || p1 == m1)
-			continue; // lines start at same node
-
-		const Vec2f q = m0;
-		const Vec2f s = m1 - m0;
-
-		const float t = (-r.y * (p.x - q.x) + r.x * (p.y - q.y)) / (-s.x * r.y + r.x * s.y);
-		const float u = (s.x * (p.y - q.y) - s.y * (p.x - q.x)) / (-s.x * r.y + r.x * s.y);
-
-		if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
-		{
-			return true;
-		}
-	}
-
-	return false;
 }
 
 bool Creature::HasLooseNodeGroups()
@@ -226,10 +198,60 @@ void Creature::Update(float dt) {
 	UpdateNodes(dt);
 }
 
-void Creature::UpdateMuscles(float dt)
+int Creature::GetMuscle(int A, int B)
 {
 	for (int i = 0; i < m_muscles.size(); i++) {
+		if ((A == m_muscles[i]->m_Ai && B == m_muscles[i]->m_Bi) || (A == m_muscles[i]->m_Bi && B == m_muscles[i]->m_Ai))
+			return i;
+	}
+	return -1;
+}
+
+int orientation(Vec2f p, Vec2f q, Vec2f r)
+{
+	int val = int((q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y));
+	if (val == 0) return 0; 	 // colinear
+	return (val > 0) ? 1 : 2; 	// clock or counterclock wise
+}
+
+void Creature::SetHull()
+{
+	// reset muscles
+	for (int i = 0; i < m_muscles.size(); i++) {
+		m_muscles[i]->m_isHull = false;
+	}
+
+	// get leftmost node
+	int currNode = 0;
+	for (int i = 1; i < m_nodes.size(); i++) {
+		if (m_nodes[i]->m_position.x < m_nodes[currNode]->m_position.x) {
+			currNode = i;
+		}
+	}
+
+	int nextNode;
+
+	for (int i = 0; i < 2 * m_nodes.size(); i++) {
+		nextNode = (currNode + 1) % m_nodes.size();
+		for (int j = 0; j < m_nodes.size(); j++) {
+			if (j!=currNode && orientation(m_nodes[currNode]->m_position, m_nodes[j]->m_position, m_nodes[nextNode]->m_position) == 2)
+				nextNode = j;
+		}
+
+		int muscle = GetMuscle(currNode, nextNode);
+		if (muscle != -1) 
+			m_muscles[muscle]->m_isHull = true;
+		
+		currNode = nextNode;
+	}
+}
+
+void Creature::UpdateMuscles(float dt)
+{
+	SetHull();
+	for (int i = 0; i < m_muscles.size(); i++) {
 		m_muscles[i]->UpdateClock(dt);
+		m_muscles[i]->SetNormal();
 		m_muscles[i]->UpdateInternalForces(dt);
 	}
 	for (int i = 0; i < m_muscles.size(); i++) {

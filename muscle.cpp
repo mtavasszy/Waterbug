@@ -76,6 +76,12 @@ void Muscle::UpdateClock(float dt)
 	}
 }
 
+void Muscle::SetNormal()
+{
+	const Vec2f AtoB = m_nodeB->m_position - m_nodeA->m_position;
+	m_normal = Vec2f::getOrthogonal(AtoB).normalize();
+}
+
 void Muscle::UpdateInternalForces(float dt)
 {
 	Vec2f d_p = m_nodeB->m_position - m_nodeA->m_position;
@@ -94,15 +100,13 @@ void Muscle::UpdateInternalForces(float dt)
 
 void Muscle::UpdateExternalForces(float dt)
 {
-	Vec2f normal = Vec2f::getOrthogonal(m_nodeB->m_position - m_nodeA->m_position).normalize();
-	
 	// drag
-	float angleCoeff_A = Vec2f::dot(normal, m_nodeA->m_velocity);
+	float angleCoeff_A = Vec2f::dot(m_normal, m_nodeA->m_velocity);
 	if (angleCoeff_A < 0)
 		angleCoeff_A = -angleCoeff_A;
 	m_nodeA->m_externalForce += -0.5f * angleCoeff_A * powf(Config::waterDragCoef, dt) * m_nodeA->m_velocity;
 
-	float angleCoeff_B = Vec2f::dot(normal, m_nodeB->m_velocity);
+	float angleCoeff_B = Vec2f::dot(m_normal, m_nodeB->m_velocity);
 	if (angleCoeff_B < 0)
 		angleCoeff_B = -angleCoeff_B;
 	m_nodeB->m_externalForce += -0.5f * angleCoeff_B * powf(Config::waterDragCoef, dt) * m_nodeB->m_velocity;
@@ -110,11 +114,11 @@ void Muscle::UpdateExternalForces(float dt)
 	// action = opposite reaction
 	float muscleExtentionRatio = Vec2f::distance(m_nodeA->m_position, m_nodeB->m_position) / Config::creature_maxEdgeLength;
 
-	float res_A = Vec2f::dot(normal, m_nodeA->m_internalforce);
-	m_nodeA->m_externalForce += -normal * res_A * muscleExtentionRatio * Config::waterFrictionCoef;
+	float res_A = Vec2f::dot(m_normal, m_nodeA->m_internalforce);
+	m_nodeA->m_externalForce += -m_normal * res_A * muscleExtentionRatio * Config::waterFrictionCoef;
 
-	float res_B = Vec2f::dot(normal, m_nodeB->m_internalforce);
-	m_nodeB->m_externalForce += -normal * res_B * muscleExtentionRatio * Config::waterFrictionCoef;
+	float res_B = Vec2f::dot(m_normal, m_nodeB->m_internalforce);
+	m_nodeB->m_externalForce += -m_normal * res_B * muscleExtentionRatio * Config::waterFrictionCoef;
 }
 
 void Muscle::Mutate(std::mt19937& gen)
@@ -149,16 +153,16 @@ void Muscle::Mutate(std::mt19937& gen)
 
 void Muscle::Draw(sf::RenderWindow& window, Vec2f camPos)
 {
-	Vec2f direction = m_nodeA->m_position - m_nodeB->m_position;
-	Vec2f unitDirection = direction.normalize();
-	Vec2f unitPerpendicular(-unitDirection.y, unitDirection.x);
-
-	Vec2f offset = (m_edgeThickness / 2.f) * unitPerpendicular;
+	Vec2f offset = (m_edgeThickness / 2.f) * m_normal;
 
 	m_edgeVertices[0].position = toSFVec(m_nodeA->m_position + offset - camPos);
 	m_edgeVertices[1].position = toSFVec(m_nodeB->m_position + offset - camPos);
 	m_edgeVertices[2].position = toSFVec(m_nodeB->m_position - offset - camPos);
 	m_edgeVertices[3].position = toSFVec(m_nodeA->m_position - offset - camPos);
+
+	// draw
+	for (int i = 0; i < 4; ++i)
+		m_edgeVertices[i].color = m_isHull ? sf::Color::Green : sf::Color::White;
 
 	window.draw(m_edgeVertices, 4, sf::Quads);
 }

@@ -15,6 +15,7 @@ public:
 
 	void ResetNodePointers(Creature* parent);
 	void UpdateClock(float dt);
+	void SetNormal();
 	void UpdateInternalForces(float dt);
 	void UpdateExternalForces(float dt);
 	void Mutate(std::mt19937& gen);
@@ -31,6 +32,10 @@ public:
 	float m_restLength;
 	float m_stiffness = 100.f;
 	float m_damping = 10.f;
+
+	// simulation
+	Vec2f m_normal;
+	bool m_isHull;
 
 	// movement
 	float m_clock; // runs from 0 to 1
