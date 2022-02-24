@@ -29,7 +29,8 @@ public:
 
 	// simulation
 	void Update(float dt);
-	int GetMuscle(int A, int B);
+	int GetMuscle(int A_i, int B_i);
+	std::vector<int> GetConnectedNodes(int n_i);
 	void SetHull();
 	void UpdateMuscles(float dt);
 	void UpdateNodes(float dt);

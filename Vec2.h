@@ -1,6 +1,8 @@
 #ifndef VEC2_H_ 
 #define VEC2_H_
 
+#define _USE_MATH_DEFINES
+
 #include <cmath>
 #include <math.h>
 #include <iostream>
@@ -179,6 +181,18 @@ public:
     static inline Vec2 interpolate (const Vec2 & u, const Vec2 & v, T alpha) {
         return (u * (1.0f - alpha) + v * alpha);
     }
+    static inline float getClockWiseAngle(const Vec2& u, const Vec2& v) {
+        if (u == v)
+            return 360.f;
+        float dot = u.x * v.x + u.y * v.y;
+        float det = u.x * v.y - u.y * v.x;
+        float angleRad = atan2(det, dot);
+        float angleDeg = angleRad / (M_PI / 180.f);
+        if(angleDeg < 0)
+            angleDeg += 360.f;
+
+        return angleDeg;
+    }
 
     // https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
     static bool isIntersect(const Vec2& p1, const Vec2& q1, const Vec2& p2, const Vec2& q2) {
@@ -240,9 +254,7 @@ private:
     static int orientation(const Vec2& p, const Vec2& q, const Vec2& r)
     {
         int val = int((q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y));
-
         if (val == 0) return 0;  // collinear
-
         return (val > 0) ? 1 : 2; // clock or counterclock wise
     }
 };

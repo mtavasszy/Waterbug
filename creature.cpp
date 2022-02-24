@@ -252,6 +252,19 @@ int Creature::GetMuscle(int A, int B)
 	return -1;
 }
 
+std::vector<int> Creature::GetConnectedNodes(int n_i)
+{
+	std::vector<int> connectedMuscles;
+
+	for (int i = 0; i < m_muscles.size(); i++) {
+		Muscle* m = m_muscles[i].get();
+		if (m->ContainsNode(n_i))
+			connectedMuscles.push_back(m->GetOther(n_i));
+	}
+
+	return connectedMuscles;
+}
+
 int orientation(Vec2f p, Vec2f q, Vec2f r)
 {
 	int val = int((q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y));
@@ -274,26 +287,39 @@ void Creature::SetHull()
 		}
 	}
 
+	Vec2f prevVec = Vec2f(-1.f, 0.f);
 	int nextNode;
 
 	for (int i = 0; i < 2 * m_nodes.size(); i++) {
-		nextNode = (currNode + 1) % m_nodes.size();
-		for (int j = 0; j < m_nodes.size(); j++) {
-			if (j!=currNode && orientation(m_nodes[currNode]->m_position, m_nodes[j]->m_position, m_nodes[nextNode]->m_position) == 2)
-				nextNode = j;
+		std::vector<int> connectedNodes = GetConnectedNodes(currNode);
+
+		if (connectedNodes.empty()) {
+			return;
+		}
+
+		nextNode = connectedNodes.front();
+		float smallestCWAngle = 360.f;
+
+		for (int j = 0; j < connectedNodes.size(); j++) {
+			Vec2f jVec = Vec2f(m_nodes[connectedNodes[j]]->m_position - m_nodes[currNode]->m_position).normalize();
+			float angle = Vec2f::getClockWiseAngle(prevVec, jVec);
+			if (angle < smallestCWAngle) {
+				smallestCWAngle = angle;
+				nextNode = connectedNodes[j];
+			}
 		}
 
 		int muscle = GetMuscle(currNode, nextNode);
-		if (muscle != -1) 
+		if (muscle != -1)
 			m_muscles[muscle]->m_isHull = true;
-		
+
+		prevVec = Vec2f(m_nodes[currNode]->m_position - m_nodes[nextNode]->m_position).normalize();;
 		currNode = nextNode;
 	}
 }
 
 void Creature::UpdateMuscles(float dt)
 {
-	//SetHull();
 	for (int i = 0; i < m_muscles.size(); i++) {
 		m_muscles[i]->UpdateClock(dt);
 		m_muscles[i]->SetNormal();
