@@ -98,6 +98,8 @@ void App::RunMultipleGenerations()
 		RunGeneration();
 		CreateOffspring();
 	}
+
+	std::system("pause");
 }
 
 void App::Run(sf::RenderWindow& window)

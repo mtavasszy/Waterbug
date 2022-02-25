@@ -37,7 +37,8 @@ public:
 
 	// simulation
 	Vec2f m_normal;
-	bool m_isHull;
+	bool m_isHullAB;
+	bool m_isHullBA;
 
 	// movement
 	float m_clock; // runs from 0 to 1

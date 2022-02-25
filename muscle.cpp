@@ -176,8 +176,10 @@ void Muscle::Draw(sf::RenderWindow& window, Vec2f camPos)
 	m_edgeVertices[3].position = toSFVec(m_nodeA->m_position - offset - camPos);
 
 	// draw
-	for (int i = 0; i < 4; ++i)
-		m_edgeVertices[i].color = m_isHull ? sf::Color::Green : sf::Color::White;
+	m_edgeVertices[0].color = m_isHullAB ? sf::Color::Green : sf::Color::Magenta;
+	m_edgeVertices[1].color = m_isHullAB ? sf::Color::Green : sf::Color::Magenta;
+	m_edgeVertices[2].color = m_isHullBA ? sf::Color::Green : sf::Color::Magenta;
+	m_edgeVertices[3].color = m_isHullBA ? sf::Color::Green : sf::Color::Magenta;
 
 	window.draw(m_edgeVertices, 4, sf::Quads);
 }

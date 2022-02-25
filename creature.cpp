@@ -276,7 +276,8 @@ void Creature::SetHull()
 {
 	// reset muscles
 	for (int i = 0; i < m_muscles.size(); i++) {
-		m_muscles[i]->m_isHull = false;
+		m_muscles[i]->m_isHullAB = false;
+		m_muscles[i]->m_isHullBA = false;
 	}
 
 	// get leftmost node
@@ -310,8 +311,22 @@ void Creature::SetHull()
 		}
 
 		int muscle = GetMuscle(currNode, nextNode);
-		if (muscle != -1)
-			m_muscles[muscle]->m_isHull = true;
+		if (muscle != -1) {
+			if (currNode == m_muscles[muscle]->m_Ai) {
+				if (m_muscles[muscle]->m_isHullAB == true) {
+					return;
+				}
+				m_muscles[muscle]->m_isHullAB = true;
+
+			}
+			else {
+				if (m_muscles[muscle]->m_isHullBA == true) {
+					return;
+				}
+				m_muscles[muscle]->m_isHullBA = true;
+
+			}
+		}
 
 		prevVec = Vec2f(m_nodes[currNode]->m_position - m_nodes[nextNode]->m_position).normalize();;
 		currNode = nextNode;
