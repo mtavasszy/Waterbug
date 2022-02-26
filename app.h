@@ -21,7 +21,6 @@ public:
 	void Draw(sf::RenderWindow& window);
 
 	std::vector<std::unique_ptr<Creature>> m_creatures;
-	bool isRunning = false;
 
 	std::unique_ptr<Creature> m_bestCreature;
 	std::vector<Vec2f> m_trail;

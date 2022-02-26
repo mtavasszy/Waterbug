@@ -12,6 +12,10 @@ App::App()
 
 void App::Intitialize()
 {
+	std::cout << "Generating " << Config::n_creatures << " random creatures.\n";
+
+	auto genStart = std::chrono::high_resolution_clock::now();
+
 	m_creatures.reserve(Config::n_creatures);
 
 	for (int i = 0; i < Config::n_creatures; i++) {
@@ -22,6 +26,11 @@ void App::Intitialize()
 	m_trailShape = sf::CircleShape(2);
 	m_trailShape.setPointCount(3);
 	m_trailShape.setFillColor(sf::Color::Black);
+
+	auto genStop = std::chrono::high_resolution_clock::now();
+	auto genDuration = std::chrono::duration_cast<std::chrono::milliseconds>(genStop - genStart);
+
+	std::cout << "Generation finished! Total time: " << genDuration.count() << " ms\n";
 }
 
 bool FitnessSortComp(const std::pair<float, int> f0, const std::pair<float, int> f1)
@@ -31,8 +40,6 @@ bool FitnessSortComp(const std::pair<float, int> f0, const std::pair<float, int>
 
 void App::RunGeneration()
 {
-	isRunning = true;
-
 	auto genStart = std::chrono::high_resolution_clock::now();
 
 #pragma omp parallel for
@@ -47,8 +54,6 @@ void App::RunGeneration()
 	auto genDuration = std::chrono::duration_cast<std::chrono::milliseconds>(genStop - genStart);
 
 	std::cout << "Generation finished! Total time: " << genDuration.count() << " ms\n";
-
-	isRunning = false;
 }
 
 void App::CreateOffspring()

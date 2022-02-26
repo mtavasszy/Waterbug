@@ -50,9 +50,12 @@ void Creature::GenerateRandom()
 	auto dis_nodes = std::uniform_int_distribution<int>(Config::creature_minNodes, Config::creature_maxNodes);
 	int nNodes = dis_nodes(m_gen);
 
+	float genArea = 3.14f * Config::creature_maxEdgeLength * Config::creature_maxEdgeLength * nNodes;
+	float genSideLength = sqrtf(genArea) * 0.5f;
+
 	// add nodes
 	for (int i = 0; i < nNodes; i++) {
-		AddRandomNode();
+		AddRandomNode(genSideLength);
 	}
 }
 
@@ -148,9 +151,9 @@ bool Creature::IsCrossingMuscle(int A_i, int B_i)
 	return false;
 }
 
-void Creature::AddRandomNode()
+void Creature::AddRandomNode(float genAreaLength)
 {
-	auto dis_pos = std::uniform_real_distribution<float>(-50.f, 50.f);
+	auto dis_pos = std::uniform_real_distribution<float>(-genAreaLength, genAreaLength);
 	auto dis_norm = std::uniform_real_distribution<float>(0.f, 1.f);
 
 	Vec2f pos = Vec2f(dis_pos(m_gen), dis_pos(m_gen));
@@ -159,7 +162,7 @@ void Creature::AddRandomNode()
 	// connect muscles
 	if (m_nodes.size() > 1) {
 		for (int i = 0; i < m_nodes.size() - 1; i++) {
-			if (dis_norm(m_gen) < Config::creature_edgeConnectChance/* && !isCrossingMuscle(pos, m_nodes[i]->m_position)*/) {
+			if (dis_norm(m_gen) < Config::creature_edgeConnectChance) {
 				int n0_i = int(m_nodes.size()) - 1;
 				int n1_i = i;
 
@@ -263,13 +266,6 @@ std::vector<int> Creature::GetConnectedNodes(int n_i)
 	}
 
 	return connectedMuscles;
-}
-
-int orientation(Vec2f p, Vec2f q, Vec2f r)
-{
-	int val = int((q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y));
-	if (val == 0) return 0; 	 // colinear
-	return (val > 0) ? 1 : 2; 	// clock or counterclock wise
 }
 
 void Creature::SetHull()
@@ -412,9 +408,12 @@ void Creature::Mutate()
 		auto mutType_rnd = std::uniform_int_distribution<int>(0, 3);
 		switch (mutType_rnd(m_gen))
 		{
-		case 0:
-			AddRandomNode();
+		case 0: {
+			float genArea = 3.14f * Config::creature_maxEdgeLength * Config::creature_maxEdgeLength * (m_nodes.size() + 1);
+			float genSideLength = sqrtf(genArea) * 0.5f;
+			AddRandomNode(genSideLength);
 			break;
+		}
 		case 1:
 			AddRandomMuscle();
 			break;

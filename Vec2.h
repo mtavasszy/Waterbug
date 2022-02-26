@@ -187,7 +187,7 @@ public:
         float dot = u.x * v.x + u.y * v.y;
         float det = u.x * v.y - u.y * v.x;
         float angleRad = atan2(det, dot);
-        float angleDeg = angleRad / (M_PI / 180.f);
+        float angleDeg = angleRad / (float(M_PI) / 180.f);
         if(angleDeg < 0)
             angleDeg += 360.f;
 
