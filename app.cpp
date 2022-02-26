@@ -130,8 +130,6 @@ void App::Run(sf::RenderWindow& window)
 void App::Update()
 {
 	m_bestCreature->Update(Config::dt);
-	m_bestCreature->SetHull();
-
 
 	Vec2f center = m_bestCreature->GetCenter();
 	if (m_trail.empty()) {

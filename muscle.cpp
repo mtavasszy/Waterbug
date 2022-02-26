@@ -12,6 +12,9 @@ Muscle::Muscle(Creature* parent, int A_i, int B_i, float clockStart, float contr
 	m_Bi = B_i;
 	ResetNodePointers(parent);
 
+	m_nodeA->m_connectedNodes.push_back(m_Bi);
+	m_nodeB->m_connectedNodes.push_back(m_Ai);
+
 	m_expandLength = Config::creature_maxEdgeLength;
 	m_contractLength = Config::creature_minEdgeLength;
 
@@ -58,6 +61,23 @@ void Muscle::ResetNodePointers(Creature* parent)
 {
 	m_nodeA = parent->m_nodes[m_Ai].get();
 	m_nodeB = parent->m_nodes[m_Bi].get();
+
+}
+
+void Muscle::HandleDelete()
+{
+	for (int i = 0; i < m_nodeA->m_connectedNodes.size(); i++) {
+		if (m_nodeA->m_connectedNodes[i] == m_Bi) {
+			m_nodeA->m_connectedNodes.erase(m_nodeA->m_connectedNodes.begin() + i);
+			break;
+		}
+	}
+	for (int i = 0; i < m_nodeB->m_connectedNodes.size(); i++) {
+		if (m_nodeB->m_connectedNodes[i] == m_Ai) {
+			m_nodeB->m_connectedNodes.erase(m_nodeB->m_connectedNodes.begin() + i);
+			break;
+		}
+	}
 }
 
 void Muscle::UpdateClock(float dt)

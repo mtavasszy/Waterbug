@@ -211,6 +211,7 @@ void Creature::RemoveRandomNode()
 		// remove connecting muscles
 		for (int i = 0; i < m_muscles.size(); i++) {
 			if (m_muscles[i]->m_Ai == n_i || m_muscles[i]->m_Bi == n_i) {
+				m_muscles[i]->HandleDelete();
 				m_muscles.erase(m_muscles.begin() + i);
 				i--;
 			}
@@ -218,6 +219,15 @@ void Creature::RemoveRandomNode()
 
 		// remove node
 		m_nodes.erase(m_nodes.begin() + n_i);
+
+		// fix connectedNodes
+		for (int i = 0; i < m_nodes.size(); i++) {
+			Node* n = m_nodes[i].get();
+			for (int j = 0; j < n->m_connectedNodes.size(); j++) {
+				if (n->m_connectedNodes[j] > n_i)
+					n->m_connectedNodes[j]--;
+			}
+		}
 
 		// fix muscle node pointers
 		for (int i = 0; i < m_muscles.size(); i++) {
@@ -237,11 +247,13 @@ void Creature::RemoveRandomMuscle()
 	if (m_muscles.size() > m_nodes.size()) {
 		auto muscle_rnd = std::uniform_int_distribution<int>(0, int(m_muscles.size()) - 1);
 		int m_i = muscle_rnd(m_gen);
+		m_muscles[m_i]->HandleDelete();
 		m_muscles.erase(m_muscles.begin() + m_i);
 	}
 }
 
 void Creature::Update(float dt) {
+	SetHull();
 	UpdateMuscles(dt);
 	UpdateNodes(dt);
 }
@@ -253,19 +265,6 @@ int Creature::GetMuscle(int A, int B)
 			return i;
 	}
 	return -1;
-}
-
-std::vector<int> Creature::GetConnectedNodes(int n_i)
-{
-	std::vector<int> connectedMuscles;
-
-	for (int i = 0; i < m_muscles.size(); i++) {
-		Muscle* m = m_muscles[i].get();
-		if (m->ContainsNode(n_i))
-			connectedMuscles.push_back(m->GetOther(n_i));
-	}
-
-	return connectedMuscles;
 }
 
 void Creature::SetHull()
@@ -288,7 +287,7 @@ void Creature::SetHull()
 	int nextNode;
 
 	for (int i = 0; i < 2 * m_nodes.size(); i++) {
-		std::vector<int> connectedNodes = GetConnectedNodes(currNode);
+		std::vector<int> connectedNodes = m_nodes[currNode]->m_connectedNodes;//GetConnectedNodes(currNode);
 
 		if (connectedNodes.empty()) {
 			return;

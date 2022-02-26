@@ -28,6 +28,8 @@ Node::Node(const Node* n)
 	m_externalForce = n->m_externalForce;
 	m_mass = n->m_mass;
 
+	m_connectedNodes = n->m_connectedNodes;
+
 	// drawing information
 	m_nodeRadius = n->m_nodeRadius;
 	m_circle = n->m_circle;

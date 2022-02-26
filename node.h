@@ -4,7 +4,6 @@
 #include <SFML/Graphics.hpp>
 #include "Vec2.h"
 
-class Muscle;
 class Node {
 
 public:
@@ -20,6 +19,8 @@ public:
 	Vec2f m_internalforce;
 	Vec2f m_externalForce;
 	float m_mass = 100.f;
+
+	std::vector<int> m_connectedNodes;
 
 	// drawing information
 	float m_nodeRadius = 12.f;

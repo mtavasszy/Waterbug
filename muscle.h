@@ -14,6 +14,7 @@ public:
 	Muscle(const Muscle* m);
 
 	void ResetNodePointers(Creature* parent);
+	void HandleDelete();
 	void UpdateClock(float dt);
 	void SetNormal();
 	bool ContainsNode(int n);
