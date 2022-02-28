@@ -292,21 +292,20 @@ void Creature::SetHull()
 	int nextNode;
 
 	for (int i = 0; i < 2 * m_nodes.size(); i++) {
-		std::vector<int> connectedNodes = m_nodes[currNode]->m_connectedNodes;
-
-		if (connectedNodes.empty()) {
+		if (m_nodes[currNode]->m_connectedNodes.empty()) {
 			return;
 		}
 
-		nextNode = connectedNodes.front();
+		nextNode = m_nodes[currNode]->m_connectedNodes.front();
 		float smallestCWAngle = 360.f;
 
-		for (int j = 0; j < connectedNodes.size(); j++) {
-			Vec2f jVec = Vec2f(m_nodes[connectedNodes[j]]->m_position - m_nodes[currNode]->m_position).normalize();
+		for (int j = 0; j < m_nodes[currNode]->m_connectedNodes.size(); j++) {
+			int jNode = m_nodes[currNode]->m_connectedNodes[j];
+			Vec2f jVec = Vec2f(m_nodes[jNode]->m_position - m_nodes[currNode]->m_position).normalize();
 			float angle = Vec2f::getClockWiseAngle(prevVec, jVec);
 			if (angle < smallestCWAngle) {
 				smallestCWAngle = angle;
-				nextNode = connectedNodes[j];
+				nextNode = jNode;
 			}
 		}
 
