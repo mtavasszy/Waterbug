@@ -11,7 +11,7 @@ class App {
 public:
 	App();
 
-	void Intitialize();
+	void IntitializeCreatures();
 	void RunGeneration();
 	void CreateOffspring();
 	void RunMultipleGenerations();
@@ -22,6 +22,10 @@ public:
 
 	std::vector<std::unique_ptr<Creature>> m_creatures;
 
+	// random
+	std::mt19937 m_gen;
+
+	// results
 	std::unique_ptr<Creature> m_bestCreature;
 	std::vector<Vec2f> m_trail;
 	sf::CircleShape m_trailShape;

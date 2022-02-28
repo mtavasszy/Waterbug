@@ -10,7 +10,7 @@
 class Creature {
 
 public:
-	Creature(bool init);
+	Creature(bool init, unsigned int seed);
 	Creature(const Creature* c);
 
 	// structure

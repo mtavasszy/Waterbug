@@ -6,11 +6,13 @@
 #include <set>
 #include "utils.h"
 
-Creature::Creature(bool init) {
+Creature::Creature(bool init, unsigned int seed) {
 
 	// random
 	std::random_device rd;
-	m_gen = std::mt19937(rd()); // Standard mersenne_twister_engine seeded with rd()
+	m_gen = std::mt19937(rd());
+	m_gen.seed(seed);
+
 	m_fitness = 0.f;
 
 	// init creature

@@ -7,19 +7,22 @@
 
 App::App()
 {
-	Intitialize();
+	std::random_device rd;
+	m_gen = std::mt19937(rd());
+	m_gen.seed(0);
 }
 
-void App::Intitialize()
+void App::IntitializeCreatures()
 {
 	std::cout << "Generating " << Config::n_creatures << " random creatures.\n";
-
 	auto genStart = std::chrono::high_resolution_clock::now();
+
+	auto dis_seed = std::uniform_int_distribution<unsigned int>(0, UINT32_MAX);
 
 	m_creatures.reserve(Config::n_creatures);
 
 	for (int i = 0; i < Config::n_creatures; i++) {
-		m_creatures.push_back(std::make_unique<Creature>(Creature(true)));
+		m_creatures.push_back(std::make_unique<Creature>(Creature(true, dis_seed(m_gen))));
 	}
 
 	// draw
@@ -109,6 +112,7 @@ void App::RunMultipleGenerations()
 
 void App::Run(sf::RenderWindow& window)
 {
+	IntitializeCreatures();
 	RunMultipleGenerations();
 
 	while (window.isOpen())
