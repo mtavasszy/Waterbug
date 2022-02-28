@@ -175,17 +175,36 @@ void Muscle::Mutate(std::mt19937& gen)
 void Muscle::Draw(sf::RenderWindow& window, Vec2f camPos)
 {
 	Vec2f offset = (m_edgeThickness / 2.f) * m_normal;
+	Vec2f hullOffset = ((m_edgeThickness / 2.f) + 1.f) * m_normal;
+
+	m_edgeVertices[0].color = sf::Color::White;
+	m_edgeVertices[1].color = sf::Color::White;
+	m_edgeVertices[2].color = sf::Color::White;
+	m_edgeVertices[3].color = sf::Color::White;
 
 	m_edgeVertices[0].position = toSFVec(m_nodeA->m_position + offset - camPos);
 	m_edgeVertices[1].position = toSFVec(m_nodeB->m_position + offset - camPos);
 	m_edgeVertices[2].position = toSFVec(m_nodeB->m_position - offset - camPos);
 	m_edgeVertices[3].position = toSFVec(m_nodeA->m_position - offset - camPos);
 
-	// draw
-	m_edgeVertices[0].color = m_isHullAB ? sf::Color::Green : sf::Color::Magenta;
-	m_edgeVertices[1].color = m_isHullAB ? sf::Color::Green : sf::Color::Magenta;
-	m_edgeVertices[2].color = m_isHullBA ? sf::Color::Green : sf::Color::Magenta;
-	m_edgeVertices[3].color = m_isHullBA ? sf::Color::Green : sf::Color::Magenta;
-
 	window.draw(m_edgeVertices, 4, sf::Quads);
+
+	if (m_isHullAB) {
+		sf::Vertex hullABLine[] =
+		{
+			sf::Vertex(toSFVec(m_nodeA->m_position + hullOffset - camPos), sf::Color::Black),
+			sf::Vertex(toSFVec(m_nodeB->m_position + hullOffset - camPos), sf::Color::Black)
+		};
+		window.draw(hullABLine, 2, sf::Lines);
+	}
+
+	if (m_isHullBA) {
+		sf::Vertex hullBALine[] =
+		{
+			sf::Vertex(toSFVec(m_nodeA->m_position - hullOffset - camPos), sf::Color::Black),
+			sf::Vertex(toSFVec(m_nodeB->m_position - hullOffset - camPos), sf::Color::Black)
+		};
+		window.draw(hullBALine, 2, sf::Lines);
+	}
+
 }
