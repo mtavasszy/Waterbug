@@ -4,12 +4,16 @@
 #include <SFML/Graphics.hpp>
 #include "Vec2.h"
 
+class Muscle;
 class Node {
 
 public:
 	Node(Vec2f position);
 	Node(const Node* n);
 
+	void ResetForces();
+	void ApplyDrag(Muscle* m);
+	void ApplyPushBack(Muscle* m);
 	void ApplyForces(float dt);
 	void Draw(sf::RenderWindow& window, Vec2f camPos);
 

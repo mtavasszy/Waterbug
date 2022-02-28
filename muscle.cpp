@@ -135,25 +135,12 @@ void Muscle::UpdateInternalForces(float dt)
 
 void Muscle::UpdateExternalForces(float dt)
 {
-	// drag
-	float angleCoeff_A = Vec2f::dot(m_normal, m_nodeA->m_velocity);
-	if (angleCoeff_A < 0)
-		angleCoeff_A = -angleCoeff_A;
-	m_nodeA->m_externalForce += -0.5f * angleCoeff_A * powf(Config::waterDragCoef, dt) * m_nodeA->m_velocity;
+	m_muscleExtentionRatio = Vec2f::distance(m_nodeA->m_position, m_nodeB->m_position) / Config::creature_maxEdgeLength;
 
-	float angleCoeff_B = Vec2f::dot(m_normal, m_nodeB->m_velocity);
-	if (angleCoeff_B < 0)
-		angleCoeff_B = -angleCoeff_B;
-	m_nodeB->m_externalForce += -0.5f * angleCoeff_B * powf(Config::waterDragCoef, dt) * m_nodeB->m_velocity;
-
-	// action = opposite reaction
-	float muscleExtentionRatio = Vec2f::distance(m_nodeA->m_position, m_nodeB->m_position) / Config::creature_maxEdgeLength;
-
-	float res_A = Vec2f::dot(m_normal, m_nodeA->m_internalforce);
-	m_nodeA->m_externalForce += -m_normal * res_A * muscleExtentionRatio * Config::waterFrictionCoef;
-
-	float res_B = Vec2f::dot(m_normal, m_nodeB->m_internalforce);
-	m_nodeB->m_externalForce += -m_normal * res_B * muscleExtentionRatio * Config::waterFrictionCoef;
+	m_nodeA->ApplyDrag(this);
+	m_nodeB->ApplyDrag(this);
+	m_nodeA->ApplyPushBack(this);
+	m_nodeB->ApplyPushBack(this);
 }
 
 void Muscle::Mutate(std::mt19937& gen)
@@ -161,7 +148,6 @@ void Muscle::Mutate(std::mt19937& gen)
 	auto mutType_rnd = std::uniform_int_distribution<int>(0, 1);
 	auto mutBit_rnd = std::uniform_int_distribution<int>(1, 8); // assume 8 bit genome
 	float change = (1.f / powf(2.f, float(mutBit_rnd(gen)))) - 0.5f;
-	//auto mut_rnd = std::uniform_real_distribution<float>(0.f, 1.f);
 
 	switch (mutType_rnd(gen))
 	{

@@ -152,7 +152,7 @@ void App::Draw(sf::RenderWindow& window)
 			m_trailShape.setFillColor(sf::Color::Black);
 		}
 
-		m_trailShape.setPosition(toSFVec(center - m_trail[i] - 1.f + Vec2f(float(Config::screen_w) / 2.f, float(Config::screen_h) / 2.f)));
+		m_trailShape.setPosition(toSFVec(m_trail[i] - 1.f + Vec2f(float(Config::screen_w) / 2.f, float(Config::screen_h) / 2.f) - center));
 		window.draw(m_trailShape);
 	}
 

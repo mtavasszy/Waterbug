@@ -3,6 +3,7 @@
 #include "Vec2.h"
 #include "config.h"
 #include "utils.h"
+#include "muscle.h"
 
 Node::Node(Vec2f position) {
 	// physics
@@ -36,16 +37,41 @@ Node::Node(const Node* n)
 	m_fillColor = n->m_fillColor;
 }
 
+void Node::ResetForces()
+{
+	m_internalforce = Vec2f(0.f);
+	m_externalForce = Vec2f(0.f);
+}
+
+void Node::ApplyDrag(Muscle* m)
+{
+	// check orientation / hull
+
+	float angleCoeff = Vec2f::dot(m->m_normal, m_velocity);
+
+	if (angleCoeff > 0 ? m->m_isHullAB : m->m_isHullBA) {
+		if (angleCoeff < 0)
+			angleCoeff = -angleCoeff;
+		m_externalForce += -0.5f * angleCoeff * powf(Config::waterDragCoef, Config::dt) * m_velocity * m->m_muscleExtentionRatio;
+	}
+}
+
+void Node::ApplyPushBack(Muscle* m)
+{
+	// check orientation / hull
+	float res = Vec2f::dot(m->m_normal, m_internalforce);
+
+	if (res > 0 ? m->m_isHullAB : m->m_isHullBA) {
+		m_externalForce += -m->m_normal * res * m->m_muscleExtentionRatio * Config::waterFrictionCoef;
+	}
+}
+
 void Node::ApplyForces(float dt)
 {
 	// euler integration
 	Vec2f force = m_internalforce + m_externalForce;
 	m_velocity += (force / m_mass) * dt;
 	m_position += m_velocity * dt;
-
-	// reset forces
-	m_internalforce = Vec2f(0.f);
-	m_externalForce = Vec2f(0.f);
 }
 
 void Node::Draw(sf::RenderWindow& window, Vec2f camPos)

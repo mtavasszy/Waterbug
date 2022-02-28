@@ -254,6 +254,11 @@ void Creature::RemoveRandomMuscle()
 
 void Creature::Update(float dt) {
 	SetHull();
+
+	for (int i = 0; i < m_nodes.size(); i++) {
+		m_nodes[i]->ResetForces();
+	}
+
 	UpdateMuscles(dt);
 	UpdateNodes(dt);
 }
@@ -287,7 +292,7 @@ void Creature::SetHull()
 	int nextNode;
 
 	for (int i = 0; i < 2 * m_nodes.size(); i++) {
-		std::vector<int> connectedNodes = m_nodes[currNode]->m_connectedNodes;//GetConnectedNodes(currNode);
+		std::vector<int> connectedNodes = m_nodes[currNode]->m_connectedNodes;
 
 		if (connectedNodes.empty()) {
 			return;

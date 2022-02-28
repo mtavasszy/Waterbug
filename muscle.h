@@ -38,6 +38,7 @@ public:
 
 	// simulation
 	Vec2f m_normal;
+	float m_muscleExtentionRatio;
 	bool m_isHullAB;
 	bool m_isHullBA;
 
