@@ -53,12 +53,18 @@ void Creature::GenerateRandom()
 	m_muscles.clear();
 
 	auto dis_nodes = std::uniform_int_distribution<int>(Config::creature_minNodes, Config::creature_maxNodes);
+	auto dis_angle = std::uniform_real_distribution<float>(0.f, 2 * float(M_PI));
+	auto dis_param = std::uniform_real_distribution<float>(0.f, 1.f);
+
 	int nNodes = dis_nodes(m_gen);
 
 	m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(0.f))));
+	m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(cos(dis_angle(m_gen)), sin(dis_angle(m_gen))) * Config::creature_maxEdgeLength)));
+
+	m_muscles.push_back(std::make_unique<Muscle>(Muscle(this, 0, 1, dis_param(m_gen), dis_param(m_gen))));
 
 	// add nodes
-	for (int i = 1; i < nNodes; i++) {
+	for (int i = 2; i < nNodes; i++) {
 		AddRandomNode();
 	}
 }
@@ -158,7 +164,7 @@ bool Creature::IsCrossingMuscle(int A_i, int B_i)
 bool Creature::IsCrossingMuscle(int A_i, Vec2f q1)
 {
 	const Vec2f p1 = m_nodes[A_i]->m_position;
-	
+
 	for (int i = 0; i < m_muscles.size(); i++) {
 		if (!m_muscles[i]->ContainsNode(A_i)) {
 			const Vec2f p2 = m_muscles[i]->m_nodeA->m_position;
@@ -174,30 +180,87 @@ bool Creature::IsCrossingMuscle(int A_i, Vec2f q1)
 
 void Creature::AddRandomNode()
 {
-	float minNewNodeDist = Config::creature_maxEdgeLength * 1.f;
-	float maxNewNodeDist = Config::creature_maxEdgeLength * 1.5f;
-	float minNewNodeDistSqr = maxNewNodeDist * maxNewNodeDist;
-	float maxNewNodeDistSqr = maxNewNodeDist * maxNewNodeDist;
+	float nodeDistSqr = Config::creature_maxEdgeLength * Config::creature_maxEdgeLength;
+	float maxNodeDistSqr = Config::creature_maxEdgeLength * Config::creature_maxEdgeLength * 2.25f;
 
 	auto dis_node = std::uniform_int_distribution<int>(0, int(m_nodes.size()) - 1);
-
-	auto dis_radius = std::uniform_real_distribution<float>(minNewNodeDist, maxNewNodeDist);
-	auto dis_angle = std::uniform_real_distribution<float>(0.f, 2 * float(M_PI));
+	auto dis_connect = std::uniform_int_distribution<int>(0, 1);
 
 	auto dis_param = std::uniform_real_distribution<float>(0.f, 1.f);
 
 	Vec2f newNodePos;
 	int newNode_i = int(m_nodes.size());
+
 	int connectedNode_i;
+	bool connectedIsCrossing = true;
 
 	do {
-		connectedNode_i = dis_node(m_gen);
-		const float radius = dis_radius(m_gen);
-		const float angle = dis_angle(m_gen);
+		int firstNode_i;
+		int secondNode_i;
 
-		newNodePos = Vec2f(cos(angle), sin(angle)) * radius;
+		// pick random node
+		firstNode_i = dis_node(m_gen);
 
-	} while (IsCrossingMuscle(connectedNode_i, newNodePos));
+		// pick random node that is close to firstnode
+		std::vector<int> closeNodes;
+
+		for (int i = 0; i < m_nodes.size(); i++) {
+			if (i != firstNode_i && Vec2f::squaredDistance(m_nodes[firstNode_i]->m_position, m_nodes[i]->m_position) < maxNodeDistSqr) {
+				closeNodes.push_back(i);
+			}
+		}
+
+		if (closeNodes.empty())
+			continue;
+
+		auto dis_secondNode = std::uniform_int_distribution<int>(0, int(closeNodes.size()) - 1);
+		secondNode_i = closeNodes[dis_secondNode(m_gen)];
+
+		// determine best of two possible positions
+		Vec2f v = m_nodes[secondNode_i]->m_position - m_nodes[firstNode_i]->m_position;
+		float dist = Vec2f::distance(m_nodes[secondNode_i]->m_position, m_nodes[firstNode_i]->m_position);
+		Vec2f v_norm = v / dist;
+		Vec2f v_ort = Vec2f::getOrthogonal(v_norm);
+
+		Vec2f posUp = m_nodes[firstNode_i]->m_position + v_norm * Config::creature_maxEdgeLength * 0.5f + v_ort * Config::creature_maxEdgeLength;
+		Vec2f posDown = m_nodes[firstNode_i]->m_position + v_norm * Config::creature_maxEdgeLength * 0.5f - v_ort * Config::creature_maxEdgeLength;
+
+		float minSqrDistUp = FLT_MAX;
+		float minSqrDistDown = FLT_MAX;
+
+		for (int i = 0; i < m_nodes.size(); i++) {
+			if (i != firstNode_i && i != secondNode_i) {
+				minSqrDistUp = std::min(minSqrDistUp, Vec2f::squaredDistance(posUp, m_nodes[i]->m_position));
+				minSqrDistDown = std::min(minSqrDistDown, Vec2f::squaredDistance(posDown, m_nodes[i]->m_position));
+			}
+		}
+
+		if (minSqrDistUp < nodeDistSqr) {
+			if (minSqrDistDown < nodeDistSqr) {
+				continue;
+			}
+			else {
+				newNodePos = posDown;
+			}
+		}
+		else {
+			if (minSqrDistDown < nodeDistSqr) {
+				newNodePos = posUp;
+			}
+			else {
+				newNodePos = minSqrDistUp > minSqrDistDown ? posUp : posDown;
+			}
+		}
+
+		connectedNode_i = dis_connect(m_gen) == 1 ? firstNode_i : secondNode_i;
+
+		connectedIsCrossing = IsCrossingMuscle(connectedNode_i, newNodePos);
+		if (connectedIsCrossing) {
+			connectedNode_i = connectedNode_i == firstNode_i ? secondNode_i : firstNode_i;
+			connectedIsCrossing = IsCrossingMuscle(connectedNode_i, newNodePos);
+		}
+
+	} while (connectedIsCrossing);
 
 	m_nodes.push_back(std::make_unique<Node>(Node(newNodePos)));
 	m_muscles.push_back(std::make_unique<Muscle>(Muscle(this, connectedNode_i, newNode_i, dis_param(m_gen), dis_param(m_gen))));
@@ -207,8 +270,7 @@ void Creature::AddRandomNode()
 		float sqrDist = Vec2f::squaredDistance(newNodePos, m_nodes[i]->m_position);
 
 		if (i != connectedNode_i
-			&& sqrDist > minNewNodeDistSqr
-			&& sqrDist < maxNewNodeDistSqr
+			&& sqrDist < maxNodeDistSqr
 			&& dis_param(m_gen) < Config::creature_edgeConnectChance
 			&& !IsCrossingMuscle(i, newNode_i)) {
 			m_muscles.push_back(std::make_unique<Muscle>(Muscle(this, i, newNode_i, dis_param(m_gen), dis_param(m_gen))));
@@ -418,7 +480,7 @@ bool Creature::IsExploded()
 	float maxSpeedSqr = maxSpeed * maxSpeed;
 
 	for (int i = 0; i < m_nodes.size(); i++) {
-		if (!isnan(m_nodes[i]->m_position.x) && ! isnan(m_nodes[i]->m_position.y) && m_nodes[i]->m_velocity.getSquaredLength() > maxSpeedSqr)
+		if (!isnan(m_nodes[i]->m_position.x) && !isnan(m_nodes[i]->m_position.y) && m_nodes[i]->m_velocity.getSquaredLength() > maxSpeedSqr)
 			return true;
 	}
 	for (int i = 0; i < m_muscles.size(); i++) {

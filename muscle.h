@@ -44,9 +44,9 @@ public:
 
 	// movement
 	float m_clock; // runs from 0 to 1
-	float m_clockStart = 0.f;
-	float m_clockSpeed = 0.5f;
-	float m_contractTime = 0.5f; //TODO cleanup default values that do nothing
+	float m_clockStart;
+	float m_clockSpeed;
+	float m_contractTime;
 
 	// drawing information
 	float m_expandThickness = 4.f;

@@ -107,7 +107,8 @@ void App::RunMultipleGenerations()
 		CreateOffspring();
 	}
 
-	std::system("pause");
+	if (Config::n_creatures != 1 && Config::n_gens != 1)
+		std::system("pause");
 }
 
 void App::Run(sf::RenderWindow& window)
