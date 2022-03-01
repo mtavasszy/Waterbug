@@ -21,6 +21,7 @@ public:
 	static constexpr float creature_edgeConnectChance = 0.35f;
 	static constexpr float creature_maxEdgeLength = 80.f;
 	static constexpr float creature_minEdgeLength = 40.f;
+	static constexpr float creature_clockSpeed = 0.01f;
 
 	// simulation physics
 	static constexpr float waterDragCoef = 0.1f;

@@ -22,7 +22,7 @@ public:
 	Vec2f m_velocity;
 	Vec2f m_internalforce;
 	Vec2f m_externalForce;
-	float m_mass = 100.f;
+	float m_mass;
 
 	std::vector<int> m_connectedNodes;
 

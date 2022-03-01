@@ -22,7 +22,8 @@ public:
 	bool HasLooseNodeGroups();
 	bool HasCrossingMuscles();
 	bool IsCrossingMuscle(int A, int B);
-	void AddRandomNode(float genAreaLength);
+	bool IsCrossingMuscle(int A_i, Vec2f q1);
+	void AddRandomNode();
 	void AddRandomMuscle();
 	void RemoveRandomNode();
 	void RemoveRandomMuscle();

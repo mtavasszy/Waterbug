@@ -23,6 +23,7 @@ Muscle::Muscle(Creature* parent, int A_i, int B_i, float clockStart, float contr
 	m_clock = m_clockStart;
 	m_restLength = m_expandLength;
 	m_contractTime = contractTime;
+	m_clockSpeed = Config::creature_clockSpeed;
 
 	// draw
 	for (int i = 0; i < 4; ++i)
@@ -41,6 +42,10 @@ Muscle::Muscle(const Muscle* m)
 	m_restLength = m->m_restLength;
 	m_stiffness = m->m_stiffness;
 	m_damping = m->m_damping;
+	m_clockSpeed = Config::creature_clockSpeed;
+
+	m_muscleExtentionRatio = m->m_muscleExtentionRatio;
+	m_normal = m->m_normal;
 
 	// movement
 	m_clock = m->m_clock; // runs from 0 to 1

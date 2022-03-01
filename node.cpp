@@ -11,7 +11,7 @@ Node::Node(Vec2f position) {
 	m_velocity = Vec2f(0.f);
 	m_internalforce = Vec2f(0.f);
 	m_externalForce = Vec2f(0.f);
-	m_mass = 1;
+	m_mass = 1.f;
 
 	// draw
 	m_circle = sf::CircleShape(m_nodeRadius);
