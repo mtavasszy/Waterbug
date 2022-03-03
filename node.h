@@ -5,6 +5,8 @@
 #include "Vec2.h"
 
 class Muscle;
+class Creature;
+
 class Node {
 
 public:
@@ -14,6 +16,7 @@ public:
 	void ResetForces();
 	void ApplyDrag(Muscle* m);
 	void ApplyPushBack(Muscle* m);
+	void CorrectCollisions(Creature* parent, int nodeId);
 	void ApplyForces(float dt);
 	void Draw(sf::RenderWindow& window, Vec2f camPos);
 

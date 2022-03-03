@@ -4,6 +4,7 @@
 #include "config.h"
 #include "utils.h"
 #include "muscle.h"
+#include "creature.h"
 
 Node::Node(Vec2f position) {
 	// physics
@@ -63,6 +64,31 @@ void Node::ApplyPushBack(Muscle* m)
 
 	if (res > 0 ? m->m_isHullAB : m->m_isHullBA) {
 		m_externalForce += -m->m_normal * res * m->m_muscleExtentionRatio * Config::waterFrictionCoef;
+	}
+}
+
+void Node::CorrectCollisions(Creature* parent, int nodeId)
+{
+	for (int i = 0; i < parent->m_muscles.size(); i++) {
+		// check if muscle is colliding
+		Muscle* m = parent->m_muscles[i].get();
+		if (!m->ContainsNode(nodeId)) {
+			const float t = Utils::closestLinePoint(m->m_nodeA->m_position, m->m_nodeB->m_position, m_position);
+			const Vec2f closestPoint = m->m_nodeA->m_position + t * (m->m_nodeB->m_position - m->m_nodeA->m_position);
+			const Vec2f pToNode = m_position - closestPoint;
+			const float sqrDist = pToNode.getSquaredLength();
+			if (sqrDist < (m_nodeRadius * m_nodeRadius)) {
+				// restore position
+				const float dist = std::sqrt(sqrDist);
+				const Vec2f pToNodeNorm = pToNode / dist;
+
+				m_position = closestPoint + pToNodeNorm * m_nodeRadius * 1.001f;
+				// restore positions relative to speeds
+
+				// apply opposite forces
+
+			}
+		}
 	}
 }
 

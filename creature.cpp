@@ -454,6 +454,7 @@ void Creature::UpdateMuscles(float dt)
 void Creature::UpdateNodes(float dt)
 {
 	for (int i = 0; i < m_nodes.size(); i++) {
+		m_nodes[i]->CorrectCollisions(this, i);
 		m_nodes[i]->ApplyForces(dt);
 	}
 }
