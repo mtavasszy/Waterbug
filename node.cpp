@@ -9,7 +9,7 @@ Node::Node(Vec2f position) {
 	// physics
 	m_position = position;
 	m_velocity = Vec2f(0.f);
-	m_internalforce = Vec2f(0.f);
+	m_internalForce = Vec2f(0.f);
 	m_externalForce = Vec2f(0.f);
 	m_mass = 1.f;
 
@@ -25,7 +25,7 @@ Node::Node(const Node* n)
 	// physics information
 	m_position = n->m_position;
 	m_velocity = n->m_velocity;
-	m_internalforce = n->m_internalforce;
+	m_internalForce = n->m_internalForce;
 	m_externalForce = n->m_externalForce;
 	m_mass = n->m_mass;
 
@@ -39,7 +39,7 @@ Node::Node(const Node* n)
 
 void Node::ResetForces()
 {
-	m_internalforce = Vec2f(0.f);
+	m_internalForce = Vec2f(0.f);
 	m_externalForce = Vec2f(0.f);
 }
 
@@ -59,7 +59,7 @@ void Node::ApplyDrag(Muscle* m)
 void Node::ApplyPushBack(Muscle* m)
 {
 	// check orientation / hull
-	float res = Vec2f::dot(m->m_normal, m_internalforce);
+	float res = Vec2f::dot(m->m_normal, m_internalForce);
 
 	if (res > 0 ? m->m_isHullAB : m->m_isHullBA) {
 		m_externalForce += -m->m_normal * res * m->m_muscleExtentionRatio * Config::waterFrictionCoef;
@@ -69,7 +69,7 @@ void Node::ApplyPushBack(Muscle* m)
 void Node::ApplyForces(float dt)
 {
 	// euler integration
-	Vec2f force = m_internalforce + m_externalForce;
+	Vec2f force = m_internalForce + m_externalForce;
 	m_velocity += (force / m_mass) * dt;
 	m_position += m_velocity * dt;
 }

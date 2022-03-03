@@ -134,8 +134,8 @@ void Muscle::UpdateInternalForces(float dt)
 
 	float F_t = F_s + F_d;
 
-	m_nodeA->m_internalforce += F_t * d_p;
-	m_nodeB->m_internalforce += F_t * -d_p;
+	m_nodeA->m_internalForce += F_t * d_p;
+	m_nodeB->m_internalForce += F_t * -d_p;
 }
 
 void Muscle::UpdateExternalForces(float dt)
