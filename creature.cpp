@@ -153,7 +153,7 @@ bool Creature::IsCrossingMuscle(int A_i, int B_i)
 			const Vec2f p2 = m->m_nodeA->m_position;
 			const Vec2f q2 = m->m_nodeB->m_position;
 
-			if (Vec2f::isIntersect(p1, q1, p2, q2))
+			if (Utils::isIntersect(p1, q1, p2, q2))
 				return true;
 		}
 	}
@@ -170,7 +170,7 @@ bool Creature::IsCrossingMuscle(int A_i, Vec2f q1)
 			const Vec2f p2 = m_muscles[i]->m_nodeA->m_position;
 			const Vec2f q2 = m_muscles[i]->m_nodeB->m_position;
 
-			if (Vec2f::isIntersect(p1, q1, p2, q2))
+			if (Utils::isIntersect(p1, q1, p2, q2))
 				return true;
 		}
 	}
@@ -409,7 +409,7 @@ void Creature::SetHull()
 		for (int j = 0; j < m_nodes[currNode]->m_connectedNodes.size(); j++) {
 			int jNode = m_nodes[currNode]->m_connectedNodes[j];
 			Vec2f jVec = Vec2f(m_nodes[jNode]->m_position - m_nodes[currNode]->m_position).normalize();
-			float angle = Vec2f::getClockWiseAngle(prevVec, jVec);
+			float angle = Utils::getClockWiseAngle(prevVec, jVec);
 			if (angle < smallestCWAngle) {
 				smallestCWAngle = angle;
 				nextNode = jNode;

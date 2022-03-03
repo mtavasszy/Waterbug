@@ -76,7 +76,7 @@ void Node::ApplyForces(float dt)
 
 void Node::Draw(sf::RenderWindow& window, Vec2f camPos)
 {
-	m_circle.setPosition(toSFVec(m_position - m_circle.getRadius() - camPos));
+	m_circle.setPosition(Utils::toSFVec(m_position - m_circle.getRadius() - camPos));
 	m_circle.setFillColor(m_fillColor);
 	window.draw(m_circle);
 }

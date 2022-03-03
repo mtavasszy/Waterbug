@@ -187,18 +187,18 @@ void Muscle::Draw(sf::RenderWindow& window, Vec2f camPos)
 	m_edgeVertices[2].color = sf::Color::White;
 	m_edgeVertices[3].color = sf::Color::White;
 
-	m_edgeVertices[0].position = toSFVec(m_nodeA->m_position + offset - camPos);
-	m_edgeVertices[1].position = toSFVec(m_nodeB->m_position + offset - camPos);
-	m_edgeVertices[2].position = toSFVec(m_nodeB->m_position - offset - camPos);
-	m_edgeVertices[3].position = toSFVec(m_nodeA->m_position - offset - camPos);
+	m_edgeVertices[0].position = Utils::toSFVec(m_nodeA->m_position + offset - camPos);
+	m_edgeVertices[1].position = Utils::toSFVec(m_nodeB->m_position + offset - camPos);
+	m_edgeVertices[2].position = Utils::toSFVec(m_nodeB->m_position - offset - camPos);
+	m_edgeVertices[3].position = Utils::toSFVec(m_nodeA->m_position - offset - camPos);
 
 	window.draw(m_edgeVertices, 4, sf::Quads);
 
 	if (m_isHullAB) {
 		sf::Vertex hullABLine[] =
 		{
-			sf::Vertex(toSFVec(m_nodeA->m_position + hullOffset - camPos), sf::Color::Black),
-			sf::Vertex(toSFVec(m_nodeB->m_position + hullOffset - camPos), sf::Color::Black)
+			sf::Vertex(Utils::toSFVec(m_nodeA->m_position + hullOffset - camPos), sf::Color::Black),
+			sf::Vertex(Utils::toSFVec(m_nodeB->m_position + hullOffset - camPos), sf::Color::Black)
 		};
 		window.draw(hullABLine, 2, sf::Lines);
 	}
@@ -206,8 +206,8 @@ void Muscle::Draw(sf::RenderWindow& window, Vec2f camPos)
 	if (m_isHullBA) {
 		sf::Vertex hullBALine[] =
 		{
-			sf::Vertex(toSFVec(m_nodeA->m_position - hullOffset - camPos), sf::Color::Black),
-			sf::Vertex(toSFVec(m_nodeB->m_position - hullOffset - camPos), sf::Color::Black)
+			sf::Vertex(Utils::toSFVec(m_nodeA->m_position - hullOffset - camPos), sf::Color::Black),
+			sf::Vertex(Utils::toSFVec(m_nodeB->m_position - hullOffset - camPos), sf::Color::Black)
 		};
 		window.draw(hullBALine, 2, sf::Lines);
 	}
