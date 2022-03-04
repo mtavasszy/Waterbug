@@ -85,22 +85,17 @@ void Node::CorrectCollisions(Creature* parent, int nodeId)
 				m_position = closestPoint + pToNodeNorm * m_nodeRadius * 1.001f;
 				// TODO restore positions relative to speeds
 
-				// preservation of kinetic energy
+				// elastic collision
 				const Vec2f v_p = Vec2f::interpolate(m->m_nodeA->m_velocity, m->m_nodeB->m_velocity, t);
 
 				const float v_p_coll = Vec2f::dot(v_p, pToNodeNorm);
 				const float v_n_coll = Vec2f::dot(m_velocity, pToNodeNorm);
 				if (v_p_coll > 0 || v_n_coll < 0) {// colliding objects are not moving away from each other
-					float v_p_coll_new = 0.333f * v_p_coll + 0.666f * v_n_coll;
-					float v_n_coll_new = 0.333f * v_n_coll + 0.666f * v_p_coll;
-					
-					m->m_nodeA->m_velocity -= (1.f - t) * v_p_coll * pToNodeNorm;
-					m->m_nodeA->m_velocity += (1.f - t) * v_p_coll_new * pToNodeNorm;
-					m->m_nodeB->m_velocity -= t * v_p_coll * pToNodeNorm;
-					m->m_nodeB->m_velocity += t * v_p_coll_new * pToNodeNorm;
+					Vec2f v_p_new = v_p - 0.666f * (Vec2f::dot(v_p - m_velocity, -pToNode) / sqrDist) * -pToNode;
+					m_velocity = m_velocity - 1.333f * (Vec2f::dot(m_velocity - v_p, pToNode) / sqrDist) * pToNode;
 
-					m_velocity -= v_n_coll * pToNodeNorm;
-					m_velocity += v_n_coll_new * pToNodeNorm;
+					m->m_nodeA->m_velocity = (1.f - t) * v_p_new;
+					m->m_nodeB->m_velocity = t * v_p_new;
 				}
 			}
 		}
