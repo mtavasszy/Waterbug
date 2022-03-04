@@ -74,7 +74,7 @@ void Node::CorrectCollisions(Creature* parent, int nodeId)
 		Muscle* m = parent->m_muscles[i].get();
 		if (!m->ContainsNode(nodeId)) {
 			const float t = Utils::closestLinePoint(m->m_nodeA->m_position, m->m_nodeB->m_position, m_position);
-			const Vec2f closestPoint = m->m_nodeA->m_position + t * (m->m_nodeB->m_position - m->m_nodeA->m_position);
+			const Vec2f closestPoint = Vec2f::interpolate(m->m_nodeA->m_position, m->m_nodeB->m_position, t);
 			const Vec2f pToNode = m_position - closestPoint;
 			const float sqrDist = pToNode.getSquaredLength();
 			if (sqrDist < (m_nodeRadius * m_nodeRadius)) {
@@ -83,10 +83,25 @@ void Node::CorrectCollisions(Creature* parent, int nodeId)
 				const Vec2f pToNodeNorm = pToNode / dist;
 
 				m_position = closestPoint + pToNodeNorm * m_nodeRadius * 1.001f;
-				// restore positions relative to speeds
+				// TODO restore positions relative to speeds
 
-				// apply opposite forces
+				// preservation of kinetic energy
+				const Vec2f v_p = Vec2f::interpolate(m->m_nodeA->m_velocity, m->m_nodeB->m_velocity, t);
 
+				const float v_p_coll = Vec2f::dot(v_p, pToNodeNorm);
+				const float v_n_coll = Vec2f::dot(m_velocity, pToNodeNorm);
+				if (v_p_coll > 0 || v_n_coll < 0) {// colliding objects are not moving away from each other
+					float v_p_coll_new = 0.333f * v_p_coll + 0.666f * v_n_coll;
+					float v_n_coll_new = 0.333f * v_n_coll + 0.666f * v_p_coll;
+					
+					m->m_nodeA->m_velocity -= (1.f - t) * v_p_coll * pToNodeNorm;
+					m->m_nodeA->m_velocity += (1.f - t) * v_p_coll_new * pToNodeNorm;
+					m->m_nodeB->m_velocity -= t * v_p_coll * pToNodeNorm;
+					m->m_nodeB->m_velocity += t * v_p_coll_new * pToNodeNorm;
+
+					m_velocity -= v_n_coll * pToNodeNorm;
+					m_velocity += v_n_coll_new * pToNodeNorm;
+				}
 			}
 		}
 	}
