@@ -22,10 +22,11 @@ Creature::Creature(bool init, unsigned int seed) {
 	if (init) {
 		do {
 			GenerateRandom();
-			m_isValid = true;
-			m_isSettled = true;
-			//TrySettleStructure();
-		} while (!m_isSettled);
+			m_isSettling = true;
+			TrySettleStructure();
+		} while (!m_isValid);
+
+		SetHull();
 	}
 }
 
@@ -42,7 +43,7 @@ Creature::Creature(const Creature* c)
 	}
 
 	m_isValid = c->m_isValid;
-	m_isSettled = c->m_isSettled;
+	m_isSettling = false;
 
 	m_fitness = 0.f;
 }
@@ -71,17 +72,34 @@ void Creature::GenerateRandom()
 
 void Creature::TrySettleStructure()
 {
-	for (int i = 0; i < Config::creature_settleIterations; i++) {
-		Update(Config::dt);
+	m_isSettling = true;
+
+	for (int i = 0; i < Config::creature_maxSettleIterations; i++) {
+		Update();
+
+		if (i > 20 && IsSettled()) {
+			std::cout << "Settle iterations: " << i << "\n";
+			break;
+		}
 	}
 
 	if (IsExploded()) {
-		m_isSettled = false;
+		m_isValid = false;
 		return;
 	}
 
 	ReCenter();
-	m_isSettled = true;
+	m_isValid = true;
+	m_isSettling = false;
+}
+
+bool Creature::IsSettled()
+{
+	for (int i = 0; i < m_nodes.size(); i++) {
+		if (m_nodes[i]->m_velocity.getSquaredLength() > Config::creature_settleEpsilon)
+			return false;
+	}
+	return true;
 }
 
 void Creature::ReCenter()
@@ -358,16 +376,14 @@ void Creature::RemoveRandomMuscle()
 	}
 }
 
-void Creature::Update(float dt) {
-	SetHull();
+void Creature::Update() {
 
 	for (int i = 0; i < m_nodes.size(); i++) {
 		m_nodes[i]->ResetForces();
-		//m_nodes[i]->m_velocity = Vec2f(0, 40);
 	}
 
-	UpdateMuscles(dt);
-	UpdateNodes(dt);
+	UpdateMuscles();
+	UpdateNodes();
 }
 
 int Creature::GetMuscle(int A, int B)
@@ -439,34 +455,46 @@ void Creature::SetHull()
 	}
 }
 
-void Creature::UpdateMuscles(float dt)
+void Creature::UpdateMuscles()
 {
 	for (int i = 0; i < m_muscles.size(); i++) {
-		m_muscles[i]->UpdateClock(dt);
+		m_muscles[i]->UpdateClock();
+
+		if (m_isSettling) {
+			m_muscles[i]->m_restLength = m_muscles[i]->m_expandLength;
+		}
+
 		m_muscles[i]->SetNormal();
-		m_muscles[i]->UpdateInternalForces(dt);
+		m_muscles[i]->UpdateInternalForces();
 	}
-	for (int i = 0; i < m_muscles.size(); i++) {
-		m_muscles[i]->UpdateExternalForces(dt);
+
+	if (!m_isSettling) {
+		for (int i = 0; i < m_muscles.size(); i++) {
+			m_muscles[i]->UpdateExternalForces();
+		}
 	}
 }
 
-void Creature::UpdateNodes(float dt)
+void Creature::UpdateNodes()
 {
 	for (int i = 0; i < m_nodes.size(); i++) {
 		m_nodes[i]->CorrectCollisions(this, i);
-		m_nodes[i]->ApplyForces(dt);
+		m_nodes[i]->ApplyForces();
+
+		if (m_isSettling) {
+			m_nodes[i]->m_velocity *= Config::creature_settleFriction;
+		}
 	}
 }
 
 float Creature::ComputeFitness()
 {
-	if (!m_isValid || !m_isSettled)
+	if (!m_isValid)
 		return -1.f;
 
 	const int nSteps = Config::runTime * Config::runFPS;
 	for (int t = 0; t < nSteps; t++) {
-		Update(Config::dt);
+		Update();
 	}
 
 	if (IsExploded())

@@ -17,7 +17,7 @@ public:
 	void ApplyDrag(Muscle* m);
 	void ApplyPushBack(Muscle* m);
 	void CorrectCollisions(Creature* parent, int nodeId);
-	void ApplyForces(float dt);
+	void ApplyForces();
 	void Draw(sf::RenderWindow& window, Vec2f camPos);
 
 	// physics information

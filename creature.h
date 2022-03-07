@@ -16,6 +16,7 @@ public:
 	// structure
 	void GenerateRandom();
 	void TrySettleStructure();
+	bool IsSettled();
 	void ReCenter();
 	Vec2f GetCenter();
 	void CheckIfValidCreature();
@@ -29,11 +30,11 @@ public:
 	void RemoveRandomMuscle();
 
 	// simulation
-	void Update(float dt);
+	void Update();
 	int GetMuscle(int A_i, int B_i);
 	void SetHull();
-	void UpdateMuscles(float dt);
-	void UpdateNodes(float dt);
+	void UpdateMuscles();
+	void UpdateNodes();
 	float ComputeFitness();
 	bool IsExploded();
 
@@ -49,7 +50,7 @@ public:
 	std::vector< std::unique_ptr<Muscle>> m_muscles;
 
 	bool m_isValid = false;
-	bool m_isSettled = false;
+	bool m_isSettling = false;
 	float m_fitness;
 
 	// random

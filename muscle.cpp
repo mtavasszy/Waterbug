@@ -85,9 +85,9 @@ void Muscle::HandleDelete()
 	}
 }
 
-void Muscle::UpdateClock(float dt)
+void Muscle::UpdateClock()
 {
-	m_clock += m_clockSpeed * dt;
+	m_clock += m_clockSpeed * Config::dt;
 	if (m_clock >= 1) {
 		m_clock = 0;
 	}
@@ -122,7 +122,7 @@ int Muscle::GetOther(int nodeId)
 	return -1;
 }
 
-void Muscle::UpdateInternalForces(float dt)
+void Muscle::UpdateInternalForces()
 {
 	Vec2f d_p = m_nodeB->m_position - m_nodeA->m_position;
 	Vec2f d_v = m_nodeB->m_velocity - m_nodeA->m_velocity;
@@ -138,9 +138,9 @@ void Muscle::UpdateInternalForces(float dt)
 	m_nodeB->m_internalForce += F_t * -d_p;
 }
 
-void Muscle::UpdateExternalForces(float dt)
+void Muscle::UpdateExternalForces()
 {
-	m_muscleExtentionRatio = Vec2f::distance(m_nodeA->m_position, m_nodeB->m_position) / Config::creature_maxEdgeLength;
+	m_muscleExtentionRatio = std::min(1.f, Vec2f::distance(m_nodeA->m_position, m_nodeB->m_position) / Config::creature_maxEdgeLength);
 
 	m_nodeA->ApplyDrag(this);
 	m_nodeB->ApplyDrag(this);

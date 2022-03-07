@@ -82,8 +82,8 @@ void Node::CorrectCollisions(Creature* parent, int nodeId)
 				const float dist = std::sqrt(sqrDist);
 				const Vec2f pToNodeNorm = pToNode / dist;
 
-				m_position = closestPoint + pToNodeNorm * m_nodeRadius * 1.001f;
 				// TODO restore positions relative to speeds
+				m_position = closestPoint + pToNodeNorm * m_nodeRadius * 1.001f;
 
 				// elastic collision
 				const Vec2f v_p = Vec2f::interpolate(m->m_nodeA->m_velocity, m->m_nodeB->m_velocity, t);
@@ -102,12 +102,12 @@ void Node::CorrectCollisions(Creature* parent, int nodeId)
 	}
 }
 
-void Node::ApplyForces(float dt)
+void Node::ApplyForces()
 {
 	// euler integration
 	Vec2f force = m_internalForce + m_externalForce;
-	m_velocity += (force / m_mass) * dt;
-	m_position += m_velocity * dt;
+	m_velocity += (force / m_mass) * Config::dt;
+	m_position += m_velocity * Config::dt;
 }
 
 void Node::Draw(sf::RenderWindow& window, Vec2f camPos)

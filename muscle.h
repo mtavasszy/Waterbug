@@ -15,12 +15,12 @@ public:
 
 	void ResetNodePointers(Creature* parent);
 	void HandleDelete();
-	void UpdateClock(float dt);
+	void UpdateClock();
 	void SetNormal();
 	bool ContainsNode(int n);
 	int GetOther(int nodeId);
-	void UpdateInternalForces(float dt);
-	void UpdateExternalForces(float dt);
+	void UpdateInternalForces();
+	void UpdateExternalForces();
 	void Mutate(std::mt19937& gen);
 	void Draw(sf::RenderWindow& window, Vec2f camPos);
 
