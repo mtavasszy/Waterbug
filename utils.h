@@ -12,6 +12,7 @@ public:
 	static int orientation(const Vec2f& p, const Vec2f& q, const Vec2f& r);
 	static bool onSegment(const Vec2f& p, const Vec2f& q, const Vec2f& r);
 	static float closestLinePoint(Vec2f v, Vec2f w, Vec2f p);
+	static float mutateFloat(float val, int flipBit);
 
 private:
 	Utils() {}

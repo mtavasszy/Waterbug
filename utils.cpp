@@ -78,3 +78,11 @@ float Utils::closestLinePoint(Vec2f v, Vec2f w, Vec2f p) {
 	const float t = std::max(0.f, std::min(1.f, Vec2f::dot(p - v, w - v) / l2));
 	return t;
 }
+
+float Utils::mutateFloat(float val, int flipBit)
+{
+	uint8_t val_int = uint8_t((val * 255.f)+0.5f);
+	val_int ^= uint8_t(1) << flipBit;
+
+	return float(val_int) / 255.f;
+}

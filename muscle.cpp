@@ -143,26 +143,15 @@ void Muscle::UpdateInternalForces()
 void Muscle::Mutate(std::mt19937& gen)
 {
 	auto mutType_rnd = std::uniform_int_distribution<int>(0, 1);
-	auto mutBit_rnd = std::uniform_int_distribution<int>(1, 8); // assume 8 bit genome
-	float change = (1.f / powf(2.f, float(mutBit_rnd(gen)))) - 0.5f;
+	auto mutBit_rnd = std::uniform_int_distribution<int>(0, 7); // assume 8 bit gene
 
 	switch (mutType_rnd(gen))
 	{
 	case 0:
-		//m_clockStart = mut_rnd(gen);
-		m_clockStart += change;
-		if (m_clockStart < 0.f)
-			m_clockStart += 1.f;
-		if (m_clockStart > 1.f)
-			m_clockStart -= 1.f;
+		m_clockStart = Utils::mutateFloat(m_clockStart, mutBit_rnd(gen));
 		break;
 	case 1:
-		//m_contractTime = mut_rnd(gen);
-		m_contractTime += change;
-		if (m_contractTime < 0.f)
-			m_contractTime += 1.f;
-		if (m_contractTime > 1.f)
-			m_contractTime -= 1.f;
+		m_contractTime = Utils::mutateFloat(m_contractTime, mutBit_rnd(gen));
 		break;
 	default:
 		break;
