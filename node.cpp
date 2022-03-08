@@ -52,8 +52,8 @@ void Node::ApplyDrag(Creature* parent, int nodeId)
 	const float velocityMag = m_velocity.getLength();
 	const Vec2f velocityNorm = m_velocity / velocityMag;
 	const Vec2f spanVec = Vec2f::getOrthogonal(velocityNorm);
-	float spanMax = 0.f;
-	float spanMin = 0.f;
+	float spanMax = m_nodeRadius * 0.47f;
+	float spanMin = -m_nodeRadius * 0.47f;
 
 	if (m_connectedNodes.empty())
 		return;
@@ -78,10 +78,8 @@ void Node::ApplyDrag(Creature* parent, int nodeId)
 		}
 	}
 
-	float surfaceCoeff = std::min(1.f, (spanMax - spanMin) / (MAX_MUSCLE_LENGTH * 2.f));
-
-	if (surfaceCoeff < 0.0001f)
-		return;
+	float spanLength = spanMax - spanMin;
+	float surfaceCoeff = std::min(1.f, spanLength / (MAX_MUSCLE_LENGTH * 2.f));
 
 	Vec2f drag = -0.5f * surfaceCoeff * velocityMag * m_velocity * WATER_DRAG_COEF_DT;
 	m_dragForce += drag;
