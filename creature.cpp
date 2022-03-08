@@ -78,18 +78,17 @@ void Creature::TrySettleStructure()
 		Update();
 
 		if (i > 20 && IsSettled()) {
-			std::cout << "Settle iterations: " << i << "\n";
 			break;
 		}
 	}
 
-	if (IsExploded()) {
-		m_isValid = false;
+	SetValidCreature();
+
+	if (!m_isValid) {
 		return;
 	}
 
 	ReCenter();
-	m_isValid = true;
 	m_isSettling = false;
 }
 
@@ -122,9 +121,9 @@ Vec2f Creature::GetCenter()
 	return center / float(m_nodes.size());
 }
 
-void Creature::CheckIfValidCreature()
+void Creature::SetValidCreature()
 {
-	m_isValid = !HasLooseNodeGroups() && !HasCrossingMuscles();
+	m_isValid = !HasLooseNodeGroups() && !HasCrossingMuscles() && !IsExploded();
 }
 
 bool Creature::HasLooseNodeGroups()
@@ -212,6 +211,9 @@ void Creature::AddRandomNode()
 	int connectedNode_i;
 	bool connectedIsCrossing = true;
 
+	int maxTries = 100;
+	int tries = 0;
+
 	do {
 		int firstNode_i;
 		int secondNode_i;
@@ -278,7 +280,9 @@ void Creature::AddRandomNode()
 			connectedIsCrossing = IsCrossingMuscle(connectedNode_i, newNodePos);
 		}
 
-	} while (connectedIsCrossing);
+		tries++;
+
+	} while (connectedIsCrossing && tries <= maxTries);
 
 	m_nodes.push_back(std::make_unique<Node>(Node(newNodePos)));
 	m_muscles.push_back(std::make_unique<Muscle>(Muscle(this, connectedNode_i, newNode_i, dis_param(m_gen), dis_param(m_gen))));
@@ -397,6 +401,9 @@ int Creature::GetMuscle(int A, int B)
 
 void Creature::SetHull()
 {
+	if (!m_isValid)
+		return;
+
 	// reset muscles
 	for (int i = 0; i < m_muscles.size(); i++) {
 		m_muscles[i]->m_isHullAB = false;
@@ -467,19 +474,14 @@ void Creature::UpdateMuscles()
 		m_muscles[i]->SetNormal();
 		m_muscles[i]->UpdateInternalForces();
 	}
-
-	if (!m_isSettling) {
-		for (int i = 0; i < m_muscles.size(); i++) {
-			m_muscles[i]->UpdateExternalForces();
-		}
-	}
 }
 
 void Creature::UpdateNodes()
 {
 	for (int i = 0; i < m_nodes.size(); i++) {
-		m_nodes[i]->CorrectCollisions(this, i);
+		m_nodes[i]->ApplyDrag(this, i);
 		m_nodes[i]->ApplyForces();
+		m_nodes[i]->CorrectCollisions(this, i);
 
 		if (m_isSettling) {
 			m_nodes[i]->m_velocity *= Config::creature_settleFriction;
@@ -489,6 +491,8 @@ void Creature::UpdateNodes()
 
 float Creature::ComputeFitness()
 {
+	SetValidCreature();
+
 	if (!m_isValid)
 		return -1.f;
 
@@ -497,7 +501,9 @@ float Creature::ComputeFitness()
 		Update();
 	}
 
-	if (IsExploded())
+	SetValidCreature();
+
+	if (!m_isValid)
 		return -1.f;
 
 	return GetCenter().getLength();
@@ -528,8 +534,9 @@ Creature Creature::createOffspring()
 	c.Mutate();
 
 	// validate creature
-	c.CheckIfValidCreature();
 	c.TrySettleStructure();
+
+	c.SetHull();
 
 	return c;
 }

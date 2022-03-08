@@ -11,7 +11,8 @@ Node::Node(Vec2f position) {
 	m_position = position;
 	m_velocity = Vec2f(0.f);
 	m_internalForce = Vec2f(0.f);
-	m_externalForce = Vec2f(0.f);
+	m_dragForce = Vec2f(0.f);
+	//m_reactionForce = Vec2f(0.f);
 	m_mass = 1.f;
 
 	// draw
@@ -27,7 +28,8 @@ Node::Node(const Node* n)
 	m_position = n->m_position;
 	m_velocity = n->m_velocity;
 	m_internalForce = n->m_internalForce;
-	m_externalForce = n->m_externalForce;
+	m_dragForce = n->m_dragForce;
+	//m_reactionForce = n->m_reactionForce;
 	m_mass = n->m_mass;
 
 	m_connectedNodes = n->m_connectedNodes;
@@ -41,31 +43,61 @@ Node::Node(const Node* n)
 void Node::ResetForces()
 {
 	m_internalForce = Vec2f(0.f);
-	m_externalForce = Vec2f(0.f);
+	m_dragForce = Vec2f(0.f);
+	//m_reactionForce = Vec2f(0.f);
 }
 
-void Node::ApplyDrag(Muscle* m)
+void Node::ApplyDrag(Creature* parent, int nodeId)
 {
-	// check orientation / hull
+	const float velocityMag = m_velocity.getLength();
+	const Vec2f velocityNorm = m_velocity / velocityMag;
+	const Vec2f spanVec = Vec2f::getOrthogonal(velocityNorm);
+	float spanMax = 0.f;
+	float spanMin = 0.f;
 
-	float angleCoeff = Vec2f::dot(m->m_normal, m_velocity);
+	if (m_connectedNodes.empty())
+		return;
 
-	if (angleCoeff > 0 ? m->m_isHullAB : m->m_isHullBA) {
-		if (angleCoeff < 0)
-			angleCoeff = -angleCoeff;
-		m_externalForce += -0.5f * angleCoeff * powf(Config::waterDragCoef, Config::dt) * m_velocity * m->m_muscleExtentionRatio;
+	for (int i = 0; i < m_connectedNodes.size(); i++) {
+
+		int connectedMuscle = -1;
+		for (int j = 0; j < parent->m_muscles.size(); j++) {
+			if (parent->m_muscles[j]->ContainsNode(nodeId) && parent->m_muscles[j]->ContainsNode(m_connectedNodes[i])) {
+				connectedMuscle = j;
+				break;
+			}
+		}
+
+		if (Vec2f::dot(velocityNorm, parent->m_muscles[connectedMuscle]->m_normal) > 0 ? parent->m_muscles[connectedMuscle]->m_isHullAB : parent->m_muscles[connectedMuscle]->m_isHullBA) {
+			const Vec2f vec2node = parent->m_nodes[m_connectedNodes[i]]->m_position - m_position;
+			const float extendAlongSpan = Vec2f::dot(spanVec, vec2node);
+			if (extendAlongSpan > 0)
+				spanMax = std::max(spanMax, extendAlongSpan);
+			if (extendAlongSpan < 0)
+				spanMin = std::min(spanMin, extendAlongSpan);
+		}
 	}
+
+	float surfaceCoeff = std::min(1.f, (spanMax - spanMin) / (Config::creature_maxEdgeLength * 2.f));
+
+	if (surfaceCoeff < 0.0001f)
+		return;
+
+	Vec2f drag = -0.5f * surfaceCoeff * velocityMag * m_velocity * powf(Config::waterDragCoef, Config::dt);
+	m_dragForce += drag;
 }
 
-void Node::ApplyPushBack(Muscle* m)
-{
-	// check orientation / hull
-	float res = Vec2f::dot(m->m_normal, m_internalForce);
-
-	if (res > 0 ? m->m_isHullAB : m->m_isHullBA) {
-		m_externalForce += -m->m_normal * res * m->m_muscleExtentionRatio * Config::waterFrictionCoef;
-	}
-}
+//void Node::ApplyPushBack(Muscle* m)
+//{
+//	// check orientation / hull
+//	float res = Vec2f::dot(m->m_normal, m_internalForce);
+//
+//	if (res > 0 ? m->m_isHullAB : m->m_isHullBA) {
+//		auto reaction = -m->m_normal * res * m->m_muscleExtentionRatio * Config::waterFrictionCoef;
+//		//m_externalForce += reaction;
+//		m_reactionForce += reaction;
+//	}
+//}
 
 void Node::CorrectCollisions(Creature* parent, int nodeId)
 {
@@ -105,7 +137,7 @@ void Node::CorrectCollisions(Creature* parent, int nodeId)
 void Node::ApplyForces()
 {
 	// euler integration
-	Vec2f force = m_internalForce + m_externalForce;
+	Vec2f force = m_internalForce + m_dragForce;// + m_reactionForce;
 	m_velocity += (force / m_mass) * Config::dt;
 	m_position += m_velocity * Config::dt;
 }

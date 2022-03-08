@@ -44,7 +44,6 @@ Muscle::Muscle(const Muscle* m)
 	m_damping = m->m_damping;
 	m_clockSpeed = Config::creature_clockSpeed;
 
-	m_muscleExtentionRatio = m->m_muscleExtentionRatio;
 	m_normal = m->m_normal;
 
 	// movement
@@ -52,6 +51,9 @@ Muscle::Muscle(const Muscle* m)
 	m_clockStart = m->m_clockStart;
 	m_clockSpeed = m->m_clockSpeed;
 	m_contractTime = m->m_contractTime;
+
+	m_isHullAB = m->m_isHullAB;
+	m_isHullBA = m->m_isHullBA;
 
 	// drawing information
 	m_expandThickness = m->m_expandThickness;
@@ -136,16 +138,6 @@ void Muscle::UpdateInternalForces()
 
 	m_nodeA->m_internalForce += F_t * d_p;
 	m_nodeB->m_internalForce += F_t * -d_p;
-}
-
-void Muscle::UpdateExternalForces()
-{
-	m_muscleExtentionRatio = std::min(1.f, Vec2f::distance(m_nodeA->m_position, m_nodeB->m_position) / Config::creature_maxEdgeLength);
-
-	m_nodeA->ApplyDrag(this);
-	m_nodeB->ApplyDrag(this);
-	m_nodeA->ApplyPushBack(this);
-	m_nodeB->ApplyPushBack(this);
 }
 
 void Muscle::Mutate(std::mt19937& gen)

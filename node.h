@@ -14,8 +14,8 @@ public:
 	Node(const Node* n);
 
 	void ResetForces();
-	void ApplyDrag(Muscle* m);
-	void ApplyPushBack(Muscle* m);
+	void ApplyDrag(Creature* parent, int nodeId);
+	//void ApplyPushBack(Muscle* m);
 	void CorrectCollisions(Creature* parent, int nodeId);
 	void ApplyForces();
 	void Draw(sf::RenderWindow& window, Vec2f camPos);
@@ -24,7 +24,8 @@ public:
 	Vec2f m_position;
 	Vec2f m_velocity;
 	Vec2f m_internalForce;
-	Vec2f m_externalForce;
+	//Vec2f m_reactionForce;
+	Vec2f m_dragForce;
 	float m_mass;
 
 	std::vector<int> m_connectedNodes;

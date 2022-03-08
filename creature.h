@@ -19,7 +19,7 @@ public:
 	bool IsSettled();
 	void ReCenter();
 	Vec2f GetCenter();
-	void CheckIfValidCreature();
+	void SetValidCreature();
 	bool HasLooseNodeGroups();
 	bool HasCrossingMuscles();
 	bool IsCrossingMuscle(int A, int B);
