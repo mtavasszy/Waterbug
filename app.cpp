@@ -49,8 +49,6 @@ bool FitnessSortComp(const std::pair<float, int> f0, const std::pair<float, int>
 
 void App::RunGeneration()
 {
-	auto genStart = std::chrono::high_resolution_clock::now();
-
 #pragma omp parallel for
 	for (int i = 0; i < m_creatures.size(); i++) {
 		Creature copyCreature = Creature(m_creatures[i].get());
@@ -58,17 +56,10 @@ void App::RunGeneration()
 		float fitness = copyCreature.ComputeFitness();
 		m_creatures[i].get()->m_fitness = fitness;
 	}
-
-	auto genStop = std::chrono::high_resolution_clock::now();
-	auto genDuration = std::chrono::duration_cast<std::chrono::milliseconds>(genStop - genStart);
-
-	std::cout << "Generation finished! Total time: " << genDuration.count() << " ms\n";
 }
 
 void App::CreateOffspring()
 {
-	auto genStart = std::chrono::high_resolution_clock::now();
-
 	// sort on fitness
 	std::vector<std::pair<float, int>> fitnessRanking;
 	fitnessRanking.reserve(m_creatures.size());
@@ -98,22 +89,31 @@ void App::CreateOffspring()
 
 	m_creatures.clear();
 	m_creatures = std::move(offspring);
-
-	auto genStop = std::chrono::high_resolution_clock::now();
-	auto genDuration = std::chrono::duration_cast<std::chrono::milliseconds>(genStop - genStart);
-
-	std::cout << "Selection finished! Total time: " << genDuration.count() << " ms\n";
 }
 
 void App::RunMultipleGenerations()
 {
 	for (int i = 0; i < N_GENERATIONS; i++) {
 		std::cout << "Running gen " << i << "\n";
+		auto genStart = std::chrono::high_resolution_clock::now();
+
 		RunGeneration();
+
+		auto genStop = std::chrono::high_resolution_clock::now();
+		auto genDuration = std::chrono::duration_cast<std::chrono::milliseconds>(genStop - genStart);
+		std::cout << "Generation finished! Total time: " << genDuration.count() << " ms\n";
+
+		genStart = std::chrono::high_resolution_clock::now();
+
 		CreateOffspring();
+
+		genStop = std::chrono::high_resolution_clock::now();
+		genDuration = std::chrono::duration_cast<std::chrono::milliseconds>(genStop - genStart);
+		std::cout << "Selection finished! Total time: " << genDuration.count() << " ms\n";
+
 	}
 
-	if (N_CREATURES != 1 && N_GENERATIONS != 1)
+	if (PAUSE_AFTER_FINISH)
 		std::system("pause");
 }
 

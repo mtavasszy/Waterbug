@@ -8,6 +8,7 @@
 #define SCREEN_H 720
 #define SET_RND_SEED true
 #define RND_SEED 0
+#define PAUSE_AFTER_FINISH false
 
 // EVOLUTIONARY ALGORITHM
 #define N_CREATURES 100
