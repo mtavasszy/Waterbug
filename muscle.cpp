@@ -145,13 +145,18 @@ bool Muscle::IsWithinBoundingBox(Vec2f p)
 		bbMax.y = m_nodeB->m_position.y + NODE_RADIUS;
 	}
 
-
 	return p.x >= bbMin.x && p.x <= bbMax.x && p.y >= bbMin.y && p.y <= bbMax.y;
 }
 
 void Muscle::UpdateInternalForces()
 {
+
 	Vec2f d_p = m_nodeB->m_position - m_nodeA->m_position;
+	if (d_p == Vec2f(0.f)) {
+		d_p = Vec2f(0.1f, 0);
+		m_nodeB->m_position += d_p;
+	}
+
 	Vec2f d_v = m_nodeB->m_velocity - m_nodeA->m_velocity;
 	float dist = d_p.getLength();
 	d_p /= dist; // normalize
