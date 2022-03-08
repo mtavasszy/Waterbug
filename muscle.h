@@ -19,6 +19,7 @@ public:
 	void SetNormal();
 	bool ContainsNode(int n);
 	int GetOther(int nodeId);
+	bool IsWithinBoundingBox(Vec2f p);
 	void UpdateInternalForces();
 	void Mutate(std::mt19937& gen);
 	void Draw(sf::RenderWindow& window, Vec2f camPos);

@@ -24,6 +24,7 @@ void App::IntitializeCreatures()
 
 	m_creatures.reserve(N_CREATURES);
 
+#pragma omp parallel for
 	for (int i = 0; i < N_CREATURES; i++) {
 		m_creatures.push_back(std::make_unique<Creature>(Creature(true, dis_seed(m_gen))));
 		if (i % (N_CREATURES / 25) == 0)

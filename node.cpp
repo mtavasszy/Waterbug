@@ -14,7 +14,7 @@ Node::Node(Vec2f position) {
 	m_dragForce = Vec2f(0.f);
 	//m_reactionForce = Vec2f(0.f);
 	m_mass = 1.f;
-
+	m_nodeRadius = NODE_RADIUS;
 	// draw
 	m_circle = sf::CircleShape(m_nodeRadius);
 	m_circle.setPointCount(20);
@@ -29,7 +29,6 @@ Node::Node(const Node* n)
 	m_velocity = n->m_velocity;
 	m_internalForce = n->m_internalForce;
 	m_dragForce = n->m_dragForce;
-	//m_reactionForce = n->m_reactionForce;
 	m_mass = n->m_mass;
 
 	m_connectedNodes = n->m_connectedNodes;
@@ -44,7 +43,6 @@ void Node::ResetForces()
 {
 	m_internalForce = Vec2f(0.f);
 	m_dragForce = Vec2f(0.f);
-	//m_reactionForce = Vec2f(0.f);
 }
 
 void Node::ApplyDrag(Creature* parent, int nodeId)
@@ -57,6 +55,8 @@ void Node::ApplyDrag(Creature* parent, int nodeId)
 
 	if (m_connectedNodes.empty())
 		return;
+
+	bool isOnHull = false;
 
 	for (int i = 0; i < m_connectedNodes.size(); i++) {
 
@@ -75,8 +75,13 @@ void Node::ApplyDrag(Creature* parent, int nodeId)
 				spanMax = std::max(spanMax, extendAlongSpan);
 			if (extendAlongSpan < 0)
 				spanMin = std::min(spanMin, extendAlongSpan);
+
+			isOnHull = true;
 		}
 	}
+
+	if (!isOnHull)
+		return;
 
 	float spanLength = spanMax - spanMin;
 	float surfaceCoeff = std::min(1.f, spanLength / (MAX_MUSCLE_LENGTH * 2.f));
@@ -85,48 +90,40 @@ void Node::ApplyDrag(Creature* parent, int nodeId)
 	m_dragForce += drag;
 }
 
-//void Node::ApplyPushBack(Muscle* m)
-//{
-//	// check orientation / hull
-//	float res = Vec2f::dot(m->m_normal, m_internalForce);
-//
-//	if (res > 0 ? m->m_isHullAB : m->m_isHullBA) {
-//		auto reaction = -m->m_normal * res * m->m_muscleExtentionRatio * Config::waterFrictionCoef;
-//		//m_externalForce += reaction;
-//		m_reactionForce += reaction;
-//	}
-//}
-
 void Node::CorrectCollisions(Creature* parent, int nodeId)
 {
 	for (int i = 0; i < parent->m_muscles.size(); i++) {
 		// check if muscle is colliding
 		Muscle* m = parent->m_muscles[i].get();
 		if (!m->ContainsNode(nodeId)) {
-			const float t = Utils::closestLinePoint(m->m_nodeA->m_position, m->m_nodeB->m_position, m_position);
-			const Vec2f closestPoint = Vec2f::interpolate(m->m_nodeA->m_position, m->m_nodeB->m_position, t);
-			const Vec2f pToNode = m_position - closestPoint;
-			const float sqrDist = pToNode.getSquaredLength();
-			if (sqrDist < (m_nodeRadius * m_nodeRadius)) {
-				// restore position
-				const float dist = std::sqrt(sqrDist);
-				const Vec2f pToNodeNorm = pToNode / dist;
+			if (m->IsWithinBoundingBox(m_position)) {
 
-				// TODO restore positions relative to speeds
-				m_position = closestPoint + pToNodeNorm * m_nodeRadius * 1.001f;
+				const float t = Utils::closestLinePoint(m->m_nodeA->m_position, m->m_nodeB->m_position, m_position);
+				const Vec2f closestPoint = Vec2f::interpolate(m->m_nodeA->m_position, m->m_nodeB->m_position, t);
+				const Vec2f pToNode = m_position - closestPoint;
+				const float sqrDist = pToNode.getSquaredLength();
+				if (sqrDist < (m_nodeRadius * m_nodeRadius)) {
+					// restore position
+					const float dist = std::sqrt(sqrDist);
+					const Vec2f pToNodeNorm = pToNode / dist;
 
-				// elastic collision
-				const Vec2f v_p = Vec2f::interpolate(m->m_nodeA->m_velocity, m->m_nodeB->m_velocity, t);
+					// TODO restore positions relative to speeds
+					m_position = closestPoint + pToNodeNorm * m_nodeRadius * 1.001f;
 
-				const float v_p_coll = Vec2f::dot(v_p, pToNodeNorm);
-				const float v_n_coll = Vec2f::dot(m_velocity, pToNodeNorm);
-				if (v_p_coll > 0 || v_n_coll < 0) {// colliding objects are not moving away from each other
-					Vec2f v_p_new = v_p - 0.666f * (Vec2f::dot(v_p - m_velocity, -pToNode) / sqrDist) * -pToNode;
-					m_velocity = m_velocity - 1.333f * (Vec2f::dot(m_velocity - v_p, pToNode) / sqrDist) * pToNode;
+					// elastic collision
+					const Vec2f v_p = Vec2f::interpolate(m->m_nodeA->m_velocity, m->m_nodeB->m_velocity, t);
 
-					m->m_nodeA->m_velocity = (1.f - t) * v_p_new;
-					m->m_nodeB->m_velocity = t * v_p_new;
+					const float v_p_coll = Vec2f::dot(v_p, pToNodeNorm);
+					const float v_n_coll = Vec2f::dot(m_velocity, pToNodeNorm);
+					if (v_p_coll > 0 || v_n_coll < 0) {// colliding objects are not moving away from each other
+						Vec2f v_p_new = v_p - 0.666f * (Vec2f::dot(v_p - m_velocity, -pToNode) / sqrDist) * -pToNode;
+						m_velocity = m_velocity - 1.333f * (Vec2f::dot(m_velocity - v_p, pToNode) / sqrDist) * pToNode;
+
+						m->m_nodeA->m_velocity = (1.f - t) * v_p_new;
+						m->m_nodeB->m_velocity = t * v_p_new;
+					}
 				}
+
 			}
 		}
 	}

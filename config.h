@@ -33,5 +33,6 @@
 #define MAX_MUSCLE_LENGTH 80.f
 #define MIN_MUSCLE_LENGTH 40.f
 #define CLOCK_SPEED 0.5f
+#define NODE_RADIUS 12.f
 
 #endif  // CONFIG_H_

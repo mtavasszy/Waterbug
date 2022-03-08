@@ -124,6 +124,31 @@ int Muscle::GetOther(int nodeId)
 	return -1;
 }
 
+bool Muscle::IsWithinBoundingBox(Vec2f p)
+{
+	Vec2f bbMin, bbMax;
+	if (m_nodeA->m_position.x >= m_nodeB->m_position.x) {
+		bbMin.x = m_nodeB->m_position.x - NODE_RADIUS;
+		bbMax.x = m_nodeA->m_position.x - NODE_RADIUS;
+	}
+	else {
+		bbMin.x = m_nodeA->m_position.x - NODE_RADIUS;
+		bbMax.x = m_nodeB->m_position.x - NODE_RADIUS;
+	}
+
+	if (m_nodeA->m_position.y >= m_nodeB->m_position.y) {
+		bbMin.y = m_nodeB->m_position.y + NODE_RADIUS;
+		bbMax.y = m_nodeA->m_position.y + NODE_RADIUS;
+	}
+	else {
+		bbMin.y = m_nodeA->m_position.y + NODE_RADIUS;
+		bbMax.y = m_nodeB->m_position.y + NODE_RADIUS;
+	}
+
+
+	return p.x >= bbMin.x && p.x <= bbMax.x && p.y >= bbMin.y && p.y <= bbMax.y;
+}
+
 void Muscle::UpdateInternalForces()
 {
 	Vec2f d_p = m_nodeB->m_position - m_nodeA->m_position;
