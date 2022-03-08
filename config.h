@@ -3,32 +3,34 @@
 
 #include "Vec2.h"
 
-class Config {
-public:
-	// app
-	static constexpr int screen_w = 1280;
-	static constexpr int screen_h = 720;
-	static constexpr int n_creatures = 500;
-	static constexpr int n_gens = 250;
-	static constexpr int runTime = 10; // seconds
-	static constexpr int runFPS = 60;
-	static constexpr float dt = 1.f / float(runFPS);
+// APP
+#define SCREEN_W 1280
+#define SCREEN_H 720
+#define SET_RND_SEED true
+#define RND_SEED 0
 
-	// creature
-	static constexpr int creature_settleIterations = 30;
-	static constexpr int creature_minNodes = 4;
-	static constexpr int creature_maxNodes = 6;
-	static constexpr float creature_edgeConnectChance = 0.35f;
-	static constexpr float creature_maxEdgeLength = 80.f;
-	static constexpr float creature_minEdgeLength = 40.f;
-	static constexpr float creature_clockSpeed = 0.01f;
+// EVOLUTIONARY ALGORITHM
+#define N_CREATURES 100
+#define N_GENERATIONS 10
+#define RUN_TIME_SECS 10
+#define RUN_FPS 60
+#define RUN_DT 1.f / float(RUN_FPS)
+#define BIG_MUT_P 0.1f
 
-	// simulation physics
-	static constexpr float waterDragCoef = 0.1f;
-	static constexpr float waterFrictionCoef = 0.5f;
+// SIMULATION
+#define MAX_VELOCITY 100.f
+#define WATER_DRAG_COEF 0.2f
+#define WATER_DRAG_COEF_DT 0.9735326f //powf(WATER_DRAG_COEF, RUN_DT)
 
-	// evolution
-	static constexpr float bigMutationChance = 0.15f;
-};
+// CREATURE
+#define MAX_SETTLE_ITERATIONS 1000
+#define SETTLE_EPSILON 0.0001f
+#define SETTLE_FRICTION_COEF 0.8f
+#define CREATURE_MIN_NODES 5
+#define CREATURE_MAX_NODES 15
+#define EDGE_CONNECT_P 0.25f
+#define MAX_MUSCLE_LENGTH 80.f
+#define MIN_MUSCLE_LENGTH 40.f
+#define CLOCK_SPEED 0.5f
 
 #endif  // CONFIG_H_

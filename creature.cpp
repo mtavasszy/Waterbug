@@ -53,14 +53,14 @@ void Creature::GenerateRandom()
 	m_nodes.clear();
 	m_muscles.clear();
 
-	auto dis_nodes = std::uniform_int_distribution<int>(Config::creature_minNodes, Config::creature_maxNodes);
+	auto dis_nodes = std::uniform_int_distribution<int>(CREATURE_MIN_NODES, CREATURE_MAX_NODES);
 	auto dis_angle = std::uniform_real_distribution<float>(0.f, 2 * float(M_PI));
 	auto dis_param = std::uniform_real_distribution<float>(0.f, 1.f);
 
 	int nNodes = dis_nodes(m_gen);
 
 	m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(0.f))));
-	m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(cos(dis_angle(m_gen)), sin(dis_angle(m_gen))) * Config::creature_maxEdgeLength)));
+	m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(cos(dis_angle(m_gen)), sin(dis_angle(m_gen))) * MAX_MUSCLE_LENGTH)));
 
 	m_muscles.push_back(std::make_unique<Muscle>(Muscle(this, 0, 1, dis_param(m_gen), dis_param(m_gen))));
 
@@ -74,7 +74,7 @@ void Creature::TrySettleStructure()
 {
 	m_isSettling = true;
 
-	for (int i = 0; i < Config::creature_maxSettleIterations; i++) {
+	for (int i = 0; i < MAX_SETTLE_ITERATIONS; i++) {
 		Update();
 
 		if (i > 20 && IsSettled()) {
@@ -95,7 +95,7 @@ void Creature::TrySettleStructure()
 bool Creature::IsSettled()
 {
 	for (int i = 0; i < m_nodes.size(); i++) {
-		if (m_nodes[i]->m_velocity.getSquaredLength() > Config::creature_settleEpsilon)
+		if (m_nodes[i]->m_velocity.getSquaredLength() > SETTLE_EPSILON)
 			return false;
 	}
 	return true;
@@ -197,8 +197,8 @@ bool Creature::IsCrossingMuscle(int A_i, Vec2f q1)
 
 void Creature::AddRandomNode()
 {
-	float nodeDistSqr = Config::creature_maxEdgeLength * Config::creature_maxEdgeLength;
-	float maxNodeDistSqr = Config::creature_maxEdgeLength * Config::creature_maxEdgeLength * 2.25f;
+	float nodeDistSqr = MAX_MUSCLE_LENGTH * MAX_MUSCLE_LENGTH;
+	float maxNodeDistSqr = nodeDistSqr * 2.25f;
 
 	auto dis_node = std::uniform_int_distribution<int>(0, int(m_nodes.size()) - 1);
 	auto dis_connect = std::uniform_int_distribution<int>(0, 1);
@@ -242,8 +242,8 @@ void Creature::AddRandomNode()
 		Vec2f v_norm = v / dist;
 		Vec2f v_ort = Vec2f::getOrthogonal(v_norm);
 
-		Vec2f posUp = m_nodes[firstNode_i]->m_position + v_norm * Config::creature_maxEdgeLength * 0.5f + v_ort * Config::creature_maxEdgeLength;
-		Vec2f posDown = m_nodes[firstNode_i]->m_position + v_norm * Config::creature_maxEdgeLength * 0.5f - v_ort * Config::creature_maxEdgeLength;
+		Vec2f posUp = m_nodes[firstNode_i]->m_position + v_norm * MAX_MUSCLE_LENGTH * 0.5f + v_ort * MAX_MUSCLE_LENGTH;
+		Vec2f posDown = m_nodes[firstNode_i]->m_position + v_norm * MAX_MUSCLE_LENGTH * 0.5f - v_ort * MAX_MUSCLE_LENGTH;
 
 		float minSqrDistUp = FLT_MAX;
 		float minSqrDistDown = FLT_MAX;
@@ -293,7 +293,7 @@ void Creature::AddRandomNode()
 
 		if (i != connectedNode_i
 			&& sqrDist < maxNodeDistSqr
-			&& dis_param(m_gen) < Config::creature_edgeConnectChance
+			&& dis_param(m_gen) < EDGE_CONNECT_P
 			&& !IsCrossingMuscle(i, newNode_i)) {
 			m_muscles.push_back(std::make_unique<Muscle>(Muscle(this, i, newNode_i, dis_param(m_gen), dis_param(m_gen))));
 		}
@@ -332,7 +332,7 @@ void Creature::AddRandomMuscle()
 
 void Creature::RemoveRandomNode()
 {
-	if (m_nodes.size() > Config::creature_minNodes && m_muscles.size() >= m_nodes.size()) {
+	if (m_nodes.size() > CREATURE_MIN_NODES && m_muscles.size() >= m_nodes.size()) {
 		auto node_rnd = std::uniform_int_distribution<int>(0, int(m_nodes.size()) - 1);
 		int n_i = node_rnd(m_gen);
 
@@ -484,7 +484,7 @@ void Creature::UpdateNodes()
 		m_nodes[i]->CorrectCollisions(this, i);
 
 		if (m_isSettling) {
-			m_nodes[i]->m_velocity *= Config::creature_settleFriction;
+			m_nodes[i]->m_velocity *= SETTLE_FRICTION_COEF;
 		}
 	}
 }
@@ -496,7 +496,7 @@ float Creature::ComputeFitness()
 	if (!m_isValid)
 		return -1.f;
 
-	const int nSteps = Config::runTime * Config::runFPS;
+	const int nSteps = RUN_TIME_SECS * RUN_FPS;
 	for (int t = 0; t < nSteps; t++) {
 		Update();
 	}
@@ -511,7 +511,7 @@ float Creature::ComputeFitness()
 
 bool Creature::IsExploded()
 {
-	float maxSpeed = Config::creature_maxEdgeLength * 5;
+	float maxSpeed = MAX_MUSCLE_LENGTH * 5;
 	float maxSpeedSqr = maxSpeed * maxSpeed;
 
 	for (int i = 0; i < m_nodes.size(); i++) {
@@ -550,7 +550,7 @@ void Creature::Mutate()
 
 	// big mutation
 	auto bigmut_rnd = std::uniform_real_distribution<float>(0.f, 1.f);
-	if (bigmut_rnd(m_gen) < Config::bigMutationChance) {
+	if (bigmut_rnd(m_gen) < BIG_MUT_P) {
 		auto mutType_rnd = std::uniform_int_distribution<int>(0, 3);
 		switch (mutType_rnd(m_gen))
 		{

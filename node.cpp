@@ -78,12 +78,12 @@ void Node::ApplyDrag(Creature* parent, int nodeId)
 		}
 	}
 
-	float surfaceCoeff = std::min(1.f, (spanMax - spanMin) / (Config::creature_maxEdgeLength * 2.f));
+	float surfaceCoeff = std::min(1.f, (spanMax - spanMin) / (MAX_MUSCLE_LENGTH * 2.f));
 
 	if (surfaceCoeff < 0.0001f)
 		return;
 
-	Vec2f drag = -0.5f * surfaceCoeff * velocityMag * m_velocity * powf(Config::waterDragCoef, Config::dt);
+	Vec2f drag = -0.5f * surfaceCoeff * velocityMag * m_velocity * WATER_DRAG_COEF_DT;
 	m_dragForce += drag;
 }
 
@@ -138,8 +138,14 @@ void Node::ApplyForces()
 {
 	// euler integration
 	Vec2f force = m_internalForce + m_dragForce;// + m_reactionForce;
-	m_velocity += (force / m_mass) * Config::dt;
-	m_position += m_velocity * Config::dt;
+	m_velocity += (force / m_mass) * RUN_DT;
+
+	const float velocitySqr = m_velocity.getSquaredLength();
+	if (velocitySqr > MAX_VELOCITY * MAX_VELOCITY) {
+		m_velocity = (m_velocity / std::sqrt(velocitySqr)) * MAX_VELOCITY;
+	}
+
+	m_position += m_velocity * RUN_DT;
 }
 
 void Node::Draw(sf::RenderWindow& window, Vec2f camPos)

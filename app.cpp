@@ -9,21 +9,27 @@ App::App()
 {
 	std::random_device rd;
 	m_gen = std::mt19937(rd());
-	m_gen.seed(0);
+	if (SET_RND_SEED) {
+		m_gen.seed(RND_SEED);
+		std::cout << "App seed set to " << RND_SEED << "\n";
+	}
 }
 
 void App::IntitializeCreatures()
 {
-	std::cout << "Generating " << Config::n_creatures << " random creatures.\n";
+	std::cout << "Generating " << N_CREATURES << " random creatures.\n";
 	auto genStart = std::chrono::high_resolution_clock::now();
 
 	auto dis_seed = std::uniform_int_distribution<unsigned int>(0, UINT32_MAX);
 
-	m_creatures.reserve(Config::n_creatures);
+	m_creatures.reserve(N_CREATURES);
 
-	for (int i = 0; i < Config::n_creatures; i++) {
+	for (int i = 0; i < N_CREATURES; i++) {
 		m_creatures.push_back(std::make_unique<Creature>(Creature(true, dis_seed(m_gen))));
+		if (i % (N_CREATURES / 25) == 0)
+			std::cout << "|";
 	}
+	std::cout << "\n";
 
 	// draw
 	m_trailShape = sf::CircleShape(2);
@@ -101,13 +107,13 @@ void App::CreateOffspring()
 
 void App::RunMultipleGenerations()
 {
-	for (int i = 0; i < Config::n_gens; i++) {
+	for (int i = 0; i < N_GENERATIONS; i++) {
 		std::cout << "Running gen " << i << "\n";
 		RunGeneration();
 		CreateOffspring();
 	}
 
-	if (Config::n_creatures != 1 && Config::n_gens != 1)
+	if (N_CREATURES != 1 && N_GENERATIONS != 1)
 		std::system("pause");
 }
 
@@ -157,9 +163,9 @@ void App::Draw(sf::RenderWindow& window)
 			m_trailShape.setFillColor(sf::Color::Black);
 		}
 
-		m_trailShape.setPosition(Utils::toSFVec(m_trail[i] - 1.f + Vec2f(float(Config::screen_w) / 2.f, float(Config::screen_h) / 2.f) - center));
+		m_trailShape.setPosition(Utils::toSFVec(m_trail[i] - 1.f + Vec2f(float(SCREEN_W) / 2.f, float(SCREEN_H) / 2.f) - center));
 		window.draw(m_trailShape);
 	}
 
-	m_bestCreature->Draw(window, center - Vec2f(float(Config::screen_w) / 2.f, float(Config::screen_h) / 2.f));
+	m_bestCreature->Draw(window, center - Vec2f(float(SCREEN_W) / 2.f, float(SCREEN_H) / 2.f));
 }

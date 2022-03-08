@@ -15,15 +15,15 @@ Muscle::Muscle(Creature* parent, int A_i, int B_i, float clockStart, float contr
 	m_nodeA->m_connectedNodes.push_back(m_Bi);
 	m_nodeB->m_connectedNodes.push_back(m_Ai);
 
-	m_expandLength = Config::creature_maxEdgeLength;
-	m_contractLength = Config::creature_minEdgeLength;
+	m_expandLength = MAX_MUSCLE_LENGTH;
+	m_contractLength = MIN_MUSCLE_LENGTH;
 
 	// clock
 	m_clockStart = clockStart;
 	m_clock = m_clockStart;
 	m_restLength = m_expandLength;
 	m_contractTime = contractTime;
-	m_clockSpeed = Config::creature_clockSpeed;
+	m_clockSpeed = CLOCK_SPEED;
 
 	// draw
 	for (int i = 0; i < 4; ++i)
@@ -37,12 +37,12 @@ Muscle::Muscle(const Muscle* m)
 	m_Bi = m->m_Bi;
 
 	// spring model info
-	m_expandLength = Config::creature_maxEdgeLength;
-	m_contractLength = Config::creature_minEdgeLength;
+	m_expandLength = MAX_MUSCLE_LENGTH;
+	m_contractLength = MIN_MUSCLE_LENGTH;
 	m_restLength = m->m_restLength;
 	m_stiffness = m->m_stiffness;
 	m_damping = m->m_damping;
-	m_clockSpeed = Config::creature_clockSpeed;
+	m_clockSpeed = CLOCK_SPEED;
 
 	m_normal = m->m_normal;
 
@@ -89,7 +89,7 @@ void Muscle::HandleDelete()
 
 void Muscle::UpdateClock()
 {
-	m_clock += m_clockSpeed * Config::dt;
+	m_clock += m_clockSpeed * RUN_DT;
 	if (m_clock >= 1) {
 		m_clock = 0;
 	}
