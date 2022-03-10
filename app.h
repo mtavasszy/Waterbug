@@ -13,6 +13,8 @@ public:
 
 	void IntitializeCreatures();
 	void RunGeneration();
+	void SetCustomCreature();
+
 	void CreateOffspring();
 	void RunMultipleGenerations();
 

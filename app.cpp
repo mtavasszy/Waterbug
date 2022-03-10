@@ -9,6 +9,7 @@ App::App()
 {
 	std::random_device rd;
 	m_gen = std::mt19937(rd());
+
 	if (SET_RND_SEED) {
 		m_gen.seed(RND_SEED);
 		std::cout << "App seed set to " << RND_SEED << "\n";
@@ -57,6 +58,68 @@ void App::RunGeneration()
 		float fitness = copyCreature.ComputeFitness();
 		m_creatures[i].get()->m_fitness = fitness;
 	}
+}
+
+void App::SetCustomCreature()
+{
+
+	m_bestCreature = std::make_unique<Creature>(Creature(false, 0));
+	m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(6.f, -52.f))));
+	m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(16.f, 28.f))));
+	m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(-23.f, 23.f))));
+	m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 0, 1, 0.182857633f, 0.230392516f)));
+	m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 1, 2, 0.366176665f, 0.515196271f)));
+	m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 2, 0, 0.665686346f, 0.416666597f)));
+	//m_bestCreature->SetHull();
+	//auto dis_seed = std::uniform_int_distribution<unsigned int>(0, UINT32_MAX);
+	//unsigned int seed = dis_seed(m_gen);
+	//std::cout << "Seed: " << seed << "\n";
+	//m_bestCreature = std::make_unique<Creature>(Creature(true, seed));
+
+	//m_bestCreature = std::make_unique<Creature>(Creature(true, 0));
+
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(-40.f, 40.f))));
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(0.f, 0.f))));
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(0.f, 80.f))));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 0, 1, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 1, 2, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 2, 3, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 3, 4, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 4, 0, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 4, 5, 0.f, 1.f)));
+
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(0.f, 0.f))));
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(40.f, -40.f))));
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(40.f, 40.f))));
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(0.f, -80.f))));
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(0.f, 80.f))));
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(-40.f, -40.f))));
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(-40.f, 40.f))));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 0, 1, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 1, 2, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 2, 0, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 1, 3, 0.f, 0.5f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 3, 0, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 2, 4, 0.f, 0.5f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 4, 0, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 4, 6, 0.f, 0.5f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 5, 3, 0.f, 0.5f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 5, 0, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 6, 0, 0.f, 1.f)));
+
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(-40.f, 0.f))));
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(40.f, 0.f))));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 0, 1, 0.f, 1.f)));
+
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(-40.f, -40.f))));
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(40.f, -40.f))));
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(40.f, 40.f))));
+	//m_bestCreature->m_nodes.push_back(std::make_unique<Node>(Node(Vec2f(-40.f, 40.f))));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 0, 1, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 1, 2, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 2, 3, 0.f, 1.f)));
+	//m_bestCreature->m_muscles.push_back(std::make_unique<Muscle>(Muscle(m_bestCreature.get(), 3, 0, 0.f, 1.f)));
+
 }
 
 void App::CreateOffspring()
@@ -120,8 +183,13 @@ void App::RunMultipleGenerations()
 
 void App::Run(sf::RenderWindow& window)
 {
-	IntitializeCreatures();
-	RunMultipleGenerations();
+	if (RUN_CUSTOM_CREATURE) {
+		SetCustomCreature();
+	}
+	else {
+		IntitializeCreatures();
+		RunMultipleGenerations();
+	}
 
 	while (window.isOpen())
 	{

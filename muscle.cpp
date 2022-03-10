@@ -150,21 +150,20 @@ bool Muscle::IsWithinBoundingBox(Vec2f p)
 
 void Muscle::UpdateInternalForces()
 {
-
 	Vec2f d_p = m_nodeB->m_position - m_nodeA->m_position;
 	if (d_p == Vec2f(0.f)) {
 		d_p = Vec2f(0.1f, 0);
 		m_nodeB->m_position += d_p;
 	}
-
-	Vec2f d_v = m_nodeB->m_velocity - m_nodeA->m_velocity;
-	float dist = d_p.getLength();
+	const float dist = d_p.getLength();
 	d_p /= dist; // normalize
 
-	float F_s = (dist - m_restLength) * m_stiffness;
-	float F_d = Vec2f::dot(d_p, d_v) * m_damping;
+	const Vec2f d_v = m_nodeB->m_velocity - m_nodeA->m_velocity;
 
-	float F_t = F_s + F_d;
+	const float F_s = (dist - m_restLength) * STIFFNESS_COEF;
+	const float F_d = Vec2f::dot(d_p, d_v) * DAMPING_COEF;
+
+	const float F_t = F_s + F_d;
 
 	m_nodeA->m_internalForce += F_t * d_p;
 	m_nodeB->m_internalForce += F_t * -d_p;
