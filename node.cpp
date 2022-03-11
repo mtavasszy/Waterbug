@@ -132,7 +132,7 @@ void Node::CorrectCollisions(Creature* parent, int nodeId)
 void Node::ApplyForces()
 {
 	// euler integration
-	Vec2f force = m_internalForce + m_dragForce;// + m_reactionForce;
+	Vec2f force = m_internalForce;// +m_dragForce;// + m_reactionForce;
 	m_velocity += (force / m_mass) * RUN_DT;
 
 	const float velocitySqr = m_velocity.getSquaredLength();
@@ -148,4 +148,11 @@ void Node::Draw(sf::RenderWindow& window, Vec2f camPos)
 	m_circle.setPosition(Utils::toSFVec(m_position - m_circle.getRadius() - camPos));
 	m_circle.setFillColor(m_fillColor);
 	window.draw(m_circle);
+
+	//sf::Vertex FLine[] =
+	//{
+	//	sf::Vertex(Utils::toSFVec(m_position - camPos), sf::Color::Yellow),
+	//	sf::Vertex(Utils::toSFVec(m_position + m_dragForce * 0.04f -camPos), sf::Color::Yellow)
+	//};
+	//window.draw(FLine, 2, sf::Lines);
 }

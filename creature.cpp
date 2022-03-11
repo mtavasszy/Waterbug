@@ -478,14 +478,32 @@ void Creature::UpdateMuscles()
 
 void Creature::UpdateNodes()
 {
+	Vec2f avg_vel = Vec2f(0.f);
 	for (int i = 0; i < m_nodes.size(); i++) {
-		m_nodes[i]->ApplyDrag(this, i);
+		avg_vel += m_nodes[i]->m_velocity;
+	}
+	avg_vel /= float(m_nodes.size());
+
+	for (int i = 0; i < m_nodes.size(); i++) {
+		//m_nodes[i]->ApplyDrag(this, i);
 		m_nodes[i]->ApplyForces();
 		m_nodes[i]->CorrectCollisions(this, i);
 
 		if (m_isSettling) {
 			m_nodes[i]->m_velocity *= SETTLE_FRICTION_COEF;
 		}
+	}
+
+	Vec2f avg_vel_after_coll = Vec2f(0.f);
+	for (int i = 0; i < m_nodes.size(); i++) {
+		avg_vel_after_coll += m_nodes[i]->m_velocity;
+	}
+	avg_vel_after_coll /= float(m_nodes.size());
+
+	Vec2f vel_dif = avg_vel_after_coll - avg_vel;
+
+	for (int i = 0; i < m_nodes.size(); i++) {
+		m_nodes[i]->m_velocity -= vel_dif;
 	}
 }
 
@@ -579,4 +597,18 @@ void Creature::Draw(sf::RenderWindow& window, Vec2f camPos) {
 	for (int i = 0; i < m_nodes.size(); i++) {
 		m_nodes[i]->Draw(window, camPos);
 	}
+	
+	//Vec2f center = GetCenter();
+	//Vec2f totalForce = Vec2f(0.f);
+	//
+	//for (int i = 0; i < m_nodes.size(); i++) {
+	//	totalForce += m_nodes[i]->m_internalForce;
+	//}
+
+	//sf::Vertex FLine[] =
+	//{
+	//	sf::Vertex(Utils::toSFVec(center - camPos), sf::Color::Yellow),
+	//	sf::Vertex(Utils::toSFVec(center + totalForce - camPos), sf::Color::Yellow)
+	//};
+	//window.draw(FLine, 2, sf::Lines);
 }
